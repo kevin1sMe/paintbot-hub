@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  paintbot:
+    # 使用官方镜像或你的镜像仓库
+    # image: ${DOCKER_IMAGE:-your-dockerhub-username/paintbot-hub:latest}
+    image: paintbot-hub:latest
+    # 如果要使用本地构建，注释掉 image 行，取消注释下面的 build 行
+    # build: .
+    container_name: paintbot
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - NODE_ENV=production
+      # OpenAI API配置
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE_URL=${OPENAI_API_BASE_URL:-}
+      # 智谱AI配置
+      - ZHIPU_API_KEY=${ZHIPU_API_KEY:-}
+      # 百度千帆配置
+      - BAIDU_API_KEY=${BAIDU_API_KEY:-}
+      - BAIDU_SECRET_KEY=${BAIDU_SECRET_KEY:-}
+      # 可选：代理设置
+      - PROXY_URL=${PROXY_URL:-}
+    restart: unless-stopped
+    # 可选：添加资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M 
