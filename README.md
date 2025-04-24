@@ -1,6 +1,9 @@
+
 # PaintBot Hub
 
 一个集成多个AI绘画平台API的统一操作界面工具，让创作变得更简单。
+
+![PaintBot演示图](./public/lovable-uploads/user-uploaded-image.png)
 
 快速试用：[https://paintbot-hub.lovable.app/](https://paintbot-hub.lovable.app/)
 
