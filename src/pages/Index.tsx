@@ -1279,7 +1279,7 @@ const Index = () => {
             <span>© {new Date().getFullYear()} Powered by Lovable</span>
             <span>|</span>
             <a 
-              href="https://github.com/kevin1sMe/multi-agent-orchestrator-nexus" 
+              href="https://github.com/kevin1sMe/paintbot-hub" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-gray-500 hover:text-gray-700 flex items-center gap-1"
