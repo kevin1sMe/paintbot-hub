@@ -3,7 +3,7 @@
 
 一个集成多个AI绘画平台API的统一操作界面工具，让创作变得更简单。
 
-![PaintBot演示图](./public/lovable-uploads/82afc7ac-f8c4-4646-bd4a-d950aa7a20f8.png)
+![PaintBot演示图](./public/lovable-uploads/f7ad69cd-fb4a-4e88-a7e0-7d10168dee86.png)
 
 快速试用：[https://paintbot-hub.lovable.app/](https://paintbot-hub.lovable.app/)
 
