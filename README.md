@@ -127,3 +127,34 @@ MIT License
 ## 致谢
 - 感谢所有为项目做出贡献的开发者
 - 特别感谢 Lovable 平台的支持
+
+# Docker 部署说明
+
+## 快速开始
+
+```bash
+# 启动服务
+docker-compose up -d
+
+# 停止服务
+docker-compose down
+```
+
+## 镜像说明
+
+我们提供两种类型的 Docker 镜像：
+
+- **latest**: 对应 main 分支的最新构建 (`kevinlin86/paintbot-hub:latest`)
+- **版本标签**: 对应特定版本，如 `kevinlin86/paintbot-hub:v1.0.0`
+
+## 环境变量说明
+
+| 变量名 | 必填 | 说明 |
+|--------|------|------|
+| PORT | 否 | 服务端口，默认8080 |
+| OPENAI_API_KEY | 否 | OpenAI API密钥 |
+| OPENAI_API_BASE_URL | 否 | OpenAI API基础URL |
+| ZHIPU_API_KEY | 否 | 智谱AI API密钥 |
+| BAIDU_API_KEY | 否 | 百度千帆API密钥 |
+| BAIDU_SECRET_KEY | 否 | 百度千帆密钥 |
+| PROXY_URL | 否 | 代理服务器地址 |
