@@ -2,6 +2,8 @@
  * 服务索引文件
  */
 
+import { getAPIKeyFromEnv } from '@/config/env';
+
 // 定义模型列表
 const MODELS = [
   {
@@ -176,12 +178,21 @@ export interface ApiProvider {
 
 // 获取API密钥
 export function getAPIKey(provider = 'zhipuai_key') {
+  // 先从环境变量中获取
+  const envKey = getAPIKeyFromEnv(provider);
+  if (envKey) {
+    return envKey;
+  }
+  // 如果环境变量中没有，则从localStorage中获取
   return localStorage.getItem(provider) || "";
 }
 
 // 设置API密钥
 export function setAPIKey(key: string, provider = 'zhipuai_key') {
-  localStorage.setItem(provider, key);
+  // 只有当环境变量中没有对应的密钥时，才允许设置
+  if (!getAPIKeyFromEnv(provider)) {
+    localStorage.setItem(provider, key);
+  }
 }
 
 // 智谱AI CogView API调用
