@@ -1,4 +1,4 @@
-# 一站式AI绘图平台
+# PaintBot Hub
 
 一个集成多个AI绘画平台API的统一操作界面工具，让创作变得更简单。
 
@@ -33,8 +33,8 @@
 
 1. 克隆项目
 ```bash
-git clone <项目地址>
-cd multi-agent-orchestrator-nexus
+git clone https://github.com/kevin1sMe/paintbot-hub.git
+cd paintbot-hub
 ```
 
 2. 安装依赖
