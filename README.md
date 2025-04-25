@@ -156,5 +156,6 @@ docker-compose down
 | OPENAI_API_BASE_URL | 否 | OpenAI API基础URL |
 | ZHIPU_API_KEY | 否 | 智谱AI API密钥 |
 | BAIDU_API_KEY | 否 | 百度千帆API密钥 |
-| BAIDU_SECRET_KEY | 否 | 百度千帆密钥 |
+| ALIYUN_WANX_KEY | 否 | 阿里云通义万相API密钥 |
+| VOLCENGINE_KEY | 否 | 火山引擎豆包API密钥（格式：AccessKey:SecretKey，例如：LTAI5abcdef:67890ghijk）|
 | PROXY_URL | 否 | 代理服务器地址 |

@@ -4,7 +4,8 @@ interface EnvConfig {
   OPENAI_API_BASE_URL?: string;
   ZHIPU_API_KEY?: string;
   BAIDU_API_KEY?: string;
-  BAIDU_SECRET_KEY?: string;
+  ALIYUN_WANX_KEY?: string;
+  VOLCENGINE_KEY?: string;
   PROXY_URL?: string;
 }
 
@@ -28,8 +29,12 @@ export const getAPIKeyFromEnv = (provider: string): string => {
       return config.OPENAI_API_KEY || '';
     case 'zhipuai_key':
       return config.ZHIPU_API_KEY || '';
-    case 'baidu_key':
+    case 'baidu_qianfan_key':
       return config.BAIDU_API_KEY || '';
+    case 'aliyun_wanx_key':
+      return config.ALIYUN_WANX_KEY || '';
+    case 'volcengine_key':
+      return config.VOLCENGINE_KEY || '';
     default:
       return '';
   }

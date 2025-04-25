@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   paintbot:
     # 使用官方镜像或你的镜像仓库
