@@ -3,6 +3,7 @@
  */
 
 import { ModelProviderConfig } from '../types';
+import { DOUBAO_MODEL } from './doubao';
 
 // 定义模型列表
 export const MODELS: ModelProviderConfig[] = [
@@ -62,21 +63,7 @@ export const MODELS: ModelProviderConfig[] = [
       { label: "flux.1-schnell", value: "flux.1-schnell", price: "0.14元/张", promptMaxLength: 512, promptSupportLang: "英文" },
     ],
   },
-  {
-    name: "火山引擎豆包",
-    value: "doubaimg",
-    url: "https://www.volcengine.com/docs/6791/1366783",
-    apiKeyName: "volcengine_key",
-    promptMaxLength: 500, // 豆包文生图提示词长度限制
-    negativePromptSupport: true, // 支持反向提示词
-    negativePromptMaxLength: 500, // 反向提示词最大长度
-    promptSupportLang: "中文、英文",
-    children: [
-      { label: "通用2.1-文生图", value: "doubaimg-text2img-v2.1", price: "待定", promptMaxLength: 500, negativePromptSupport: true, promptSupportLang: "中文、英文" },
-      { label: "通用2.0Pro-文生图", value: "doubaimg-text2img-v2.0pro", price: "待定", promptMaxLength: 500, negativePromptSupport: true, promptSupportLang: "中文、英文" },
-      { label: "通用2.0-文生图", value: "doubaimg-text2img-v2.0", price: "待定", promptMaxLength: 500, negativePromptSupport: true, promptSupportLang: "中文、英文" }
-    ],
-  },
+  DOUBAO_MODEL,
   // 未来可添加更多平台
 ];
 

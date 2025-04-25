@@ -65,11 +65,16 @@ export async function computeHmac(key: ArrayBuffer, message: string): Promise<Ar
 
 // 签名计算
 export async function computeSignature(stringToSign: string, secretKey: string, date: string, region: string, service: string): Promise<string> {
-  const kSecret = new TextEncoder().encode(`HMAC-SHA256${secretKey}`);
+  // 修正密钥前缀，直接使用secretKey
+  const kSecret = new TextEncoder().encode(secretKey);
+  
+  // 按照火山引擎文档要求的方式构建签名密钥
   const kDate = await computeHmac(kSecret, date);
   const kRegion = await computeHmac(kDate, region);
   const kService = await computeHmac(kRegion, service);
   const kSigning = await computeHmac(kService, "request");
+  
+  // 最后计算签名
   const signature = await computeHmac(kSigning, stringToSign);
   return hexEncode(signature);
 }
