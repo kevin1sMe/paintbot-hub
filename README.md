@@ -1,10 +1,12 @@
 # PaintBot Hub
 
-一个集成多个AI绘画平台API的统一操作界面工具，让创作变得更简单。
+一个集成多个AI绘画平台API的统一操作界面网页，让创作变得更简单。
 
 ![PaintBot演示图](./public/paintbot-hub-ui.png)
 
 快速试用：[https://paintbot-hub.lovable.app/](https://paintbot-hub.lovable.app/)
+
+更多的介绍查看 [PaintBot Hub: 一站式AI绘画平台大集成](https://gameapp.club/post/2025-04-24-paintbot-hub/)
 
 ## 功能特点
 
@@ -39,37 +41,35 @@
 - 实时生成状态显示
 - 移动端适配支持
 
-## 快速开始
+## 本地部署指南
 
-### 环境要求
-- Node.js 18+
-- npm 或 yarn
-
-### 安装步骤
-
-1. 克隆项目
+### 使用Docker快速部署
+你只需要在本地安装Docker，然后执行以下命令：
 ```bash
-git clone https://github.com/kevin1sMe/paintbot-hub.git
-cd paintbot-hub
+docker run -d -p 8080:8080 kevinlin86/paintbot-hub:latest
 ```
+接着打开浏览器访问 `http://localhost:8080` 即可。
 
-2. 安装依赖
-```bash
-npm install
-# 或
-yarn install
+### 使用docker-compose
+你可以本地编辑一个这样的文件，或者直接打开Github代码仓库中的[docker-compose.yml](https://github.com/kevin1sMe/paintbot-hub/blob/main/docker-compose.yml)文件并复制过来。
+
+参考`env.example`文件创建一个`.env`文件，修改其中的环境变量。KEY等写不写无所谓，若服务对外开放建议不写。
+
+```yaml
+services:
+  paintbot:
+    image: kevinlin86/paintbot-hub:latest
+    container_name: paintbot
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-8080}:8080"
+    restart: unless-stopped
 ```
+然后执行命令`docker-compose up -d`，接着打开浏览器访问 `http://localhost:8080` 即可。
+更多的使用以及未来可能的更新，可以参考[Github项目](https://github.com/kevin1sMe/paintbot-hub)。
 
-3. 启动开发服务器
-```bash
-npm run dev
-# 或
-yarn dev
-```
-
-4. 在浏览器中访问 `http://localhost:8080`
-
-## 使用指南
+## 网页使用指南
 
 1. 首次使用需要配置API密钥
    - 点击设置图标
@@ -107,16 +107,22 @@ src/
   └── pages/         # 页面组件
 ```
 
-### 添加新的AI平台
-1. 在 `src/services/index.ts` 中添加新平台的API调用函数
-2. 在 `MODELS` 配置中添加新平台信息
-3. 实现对应的接口适配
+### 编译&运行
+1. 克隆项目
+```bash
+git clone https://github.com/kevin1sMe/paintbot-hub.git
+cd paintbot-hub
+```
 
-### 代码规范
-- 使用 ESLint 进行代码检查
-- 遵循 TypeScript 严格模式
-- 组件使用函数式组件和Hooks
-- 保持代码简洁和可维护性
+2. 安装依赖
+```bash
+npm install
+```
+
+3. 启动开发服务器
+```bash
+npm run dev
+```
 
 ## 贡献指南
 欢迎提交 Issue 和 Pull Request 来帮助改进项目。
@@ -128,34 +134,4 @@ MIT License
 - 感谢所有为项目做出贡献的开发者
 - 特别感谢 Lovable 平台的支持
 
-# Docker 部署说明
 
-## 快速开始
-
-```bash
-# 启动服务
-docker-compose up -d
-
-# 停止服务
-docker-compose down
-```
-
-## 镜像说明
-
-我们提供两种类型的 Docker 镜像：
-
-- **latest**: 对应 main 分支的最新构建 (`kevinlin86/paintbot-hub:latest`)
-- **版本标签**: 对应特定版本，如 `kevinlin86/paintbot-hub:v1.0.0`
-
-## 环境变量说明
-
-| 变量名 | 必填 | 说明 |
-|--------|------|------|
-| PORT | 否 | 服务端口，默认8080 |
-| OPENAI_API_KEY | 否 | OpenAI API密钥 |
-| OPENAI_API_BASE_URL | 否 | OpenAI API基础URL |
-| ZHIPU_API_KEY | 否 | 智谱AI API密钥 |
-| BAIDU_API_KEY | 否 | 百度千帆API密钥 |
-| ALIYUN_WANX_KEY | 否 | 阿里云通义万相API密钥 |
-| VOLCENGINE_KEY | 否 | 火山引擎豆包API密钥（格式：AccessKey:SecretKey，例如：LTAI5abcdef:67890ghijk）|
-| PROXY_URL | 否 | 代理服务器地址 |
