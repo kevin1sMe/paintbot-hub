@@ -662,14 +662,14 @@ const Index = () => {
       const results = await Promise.all(
         imagesToGenerate.map(async (_, index) => {
           // 使用统一的生成图片函数，传递负面提示词
-          const imgUrl = await generateImage(
+          const imgUrl = await generateImage({
             prompt, 
-            subModel, 
-            providerApiKey, 
-            currentSize, 
+            model: subModel || model, // 确保model不为undefined
+            apiKey: providerApiKey, 
+            imageSize: currentSize, 
             addLog,
-            supportsNegativePrompt ? negativePrompt : undefined // 只在支持负面提示词的模型中传递
-          );
+            negativePrompt: supportsNegativePrompt ? negativePrompt : undefined // 只在支持负面提示词的模型中传递
+          });
           
           // 减少待处理的图片数量
           setPendingImages(prev => Math.max(0, prev - 1));
