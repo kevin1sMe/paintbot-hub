@@ -16,6 +16,60 @@
   transition: opacity 0.5s ease;
 }
 
+/* 使用动态计算的视口高度 */
+.real-h-screen {
+  height: 100vh; /* 兼容旧浏览器 */
+  height: calc(var(--vh, 1vh) * 100); /* 使用动态计算的视口高度 */
+  /* 使用真实高度变量 - 新增 */
+  height: var(--real-height, 100vh);
+}
+
+.real-min-h-screen {
+  min-height: 100vh; /* 兼容旧浏览器 */
+  min-height: calc(var(--vh, 1vh) * 100); /* 使用动态计算的视口高度 */
+  /* 使用真实高度变量 - 新增 */
+  min-height: var(--real-height, 100vh);
+  
+  /* 重要：防止页面溢出 */
+  max-height: calc(var(--vh, 1vh) * 100);
+  max-height: var(--real-height, 100vh);
+  overflow: hidden;
+}
+
+/* 内容区域高度 */
+.content-height {
+  height: calc(var(--content-vh, 1vh) * 100);
+  max-height: calc(var(--content-vh, 1vh) * 100);
+  /* 使用主内容高度变量 - 新增 */
+  height: var(--main-height, auto);
+  max-height: var(--main-height, auto);
+}
+
+/* 历史记录区域动画 */
+.history-container {
+  transition: max-height 0.3s ease, min-height 0.3s ease;
+}
+
+/* 避免在iOS Safari上出现橡皮筋效果 */
+.overflow-scroll-fix {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* 调试信息 */
+.debug-info {
+  position: fixed;
+  bottom: 60px;
+  right: 10px;
+  font-size: 10px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
 @media (max-width: 1024px) {
   .security-banner {
     max-width: 50%;
@@ -27,6 +81,14 @@
   .security-banner {
     max-width: 45%;
     min-width: 200px;
+  }
+  
+  /* 在移动设备上优化历史记录区域 */
+  .mobile-history {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
   }
 }
 

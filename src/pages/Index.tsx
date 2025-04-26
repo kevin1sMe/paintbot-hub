@@ -3,6 +3,7 @@ import AIModelSelector from "../components/AIModelSelector";
 import { Button } from "@/components/ui/button";
 import GeneratedImageCard from "../components/GeneratedImageCard";
 import DebugPanel from "../components/DebugPanel";
+import LayoutAdjuster from "../components/LayoutAdjuster";
 import { toast } from "@/hooks/use-toast";
 import { Settings, ChevronDown, Eye, EyeOff, Copy, Check } from "lucide-react";
 import { 
@@ -863,6 +864,9 @@ const Index = () => {
 
   const [currentTip, setCurrentTip] = useState(0);
   
+  // 添加历史记录展开/折叠状态
+  const [historyCollapsed, setHistoryCollapsed] = useState(false);
+  
   // Tips切换效果
   useEffect(() => {
     const tipInterval = setInterval(() => {
@@ -886,9 +890,12 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col w-full">
+    <div className="real-min-h-screen bg-gray-100 flex flex-col w-full">
+      {/* 布局调整器组件 */}
+      <LayoutAdjuster />
+      
       {/* 顶部带安全提示的导航栏 */}
-      <div className="bg-gradient-to-r from-blue-50 via-white to-indigo-50 border border-red-200 rounded-lg mx-4 mt-4 mb-1 py-3 px-4 shadow-sm">
+      <div className="bg-gradient-to-r from-blue-50 via-white to-indigo-50 border border-red-200 rounded-lg mx-4 mt-4 mb-1 py-3 px-4 shadow-sm flex-shrink-0">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="Logo" className="h-8 w-auto rounded-lg" />
@@ -906,7 +913,7 @@ const Index = () => {
 
       {/* 设置面板 - 条件渲染 */}
       {showSettings && (
-        <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
           <div className="max-w-7xl mx-auto py-4 px-4">
             <h3 className="text-sm font-medium text-gray-700 mb-2">API密钥设置</h3>
             <div className="border border-gray-200 rounded-md p-4">
@@ -987,9 +994,9 @@ const Index = () => {
       )}
 
       {/* 主体内容区域 - 左右分栏 */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row" style={{minHeight: 0}}>
         {/* 左侧输入区域 */}
-        <div className="w-[400px] bg-white border-r border-gray-200 flex flex-col">
+        <div className="w-full md:w-[400px] bg-white border-r border-gray-200 flex flex-col overflow-y-auto max-h-[50vh] md:max-h-none flex-shrink-0">
           <div className="p-4 flex-1 flex flex-col">
             {/* 模型选择区 - 水平排列两个下拉框 */}
             <div className="mb-6 border border-gray-200 rounded-md p-2">
@@ -1122,7 +1129,7 @@ const Index = () => {
             )}
             
             {/* 生成按钮 - 移到提示词下方 */}
-            <div className="mb-6">
+            <div className="mb-4">
               <Button
                 className="bg-blue-600 hover:bg-blue-700 text-white w-full py-3 rounded-md text-base font-medium flex items-center justify-center gap-2 h-auto"
                 onClick={handleGenerate}
@@ -1154,88 +1161,111 @@ const Index = () => {
               </Button>
             </div>
             
-            {/* 图片设置 - 简化版 */}
-            <div className="mb-6">
+            {/* 图片设置 - 合并版本 */}
+            <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                图片比例
+                图片设置
               </label>
-              <div className="relative">
-                <select
-                  className="w-full appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-10 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-                  value={selectedRatio}
-                  onChange={(e) => setSelectedRatio(e.target.value)}
-                >
-                  {ASPECT_RATIOS.map(ratio => (
-                    <option key={ratio.value} value={ratio.value}>
-                      {ratio.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
-                  <ChevronDown size={16} />
+              <div className="border border-gray-200 rounded-md p-3">
+                {/* 合并：比例+尺寸+数量 */}
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                  {/* 第一列：比例选择 */}
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">比例</label>
+                    <div className="relative">
+                      <select
+                        className="w-full appearance-none bg-white border border-gray-300 rounded-md pl-2 pr-7 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                        value={selectedRatio}
+                        onChange={(e) => setSelectedRatio(e.target.value)}
+                      >
+                        {ASPECT_RATIOS.map(ratio => (
+                          <option key={ratio.value} value={ratio.value}>
+                            {ratio.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-1.5 pointer-events-none text-gray-500">
+                        <ChevronDown size={12} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* 第二列：生成数量 */}
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">数量</label>
+                    <div className="relative">
+                      <select
+                        className="w-full appearance-none bg-white border border-gray-300 rounded-md pl-2 pr-7 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                        value={imageCount}
+                        onChange={(e) => setImageCount(Number(e.target.value))}
+                      >
+                        {[1, 2, 3, 4, 5, 6].map(num => (
+                          <option key={num} value={num}>{num}张</option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-1.5 pointer-events-none text-gray-500">
+                        <ChevronDown size={12} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* 第三列：尺寸预览 */}
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">尺寸</label>
+                    <div className="h-[30px] bg-gray-50 border border-gray-300 rounded-md flex items-center justify-center px-2 text-xs text-gray-700">
+                      {dimensions.width} × {dimensions.height}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            
-            {/* 图片尺寸展示 */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                图片尺寸
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">宽度</label>
-                  <input 
-                    type="number" 
-                    className={`w-full border ${!validateDimensions() ? 'border-red-300' : 'border-gray-300'} rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                    value={dimensions.width}
-                    onChange={(e) => handleDimensionChange('width', e.target.value)}
-                    step="16"
-                    min="512"
-                    max="2048"
-                  />
+                
+                {/* 尺寸调整部分 */}
+                <div className="flex gap-2 items-center mb-2">
+                  <div className="w-1/2">
+                    <input 
+                      type="range"
+                      min="512"
+                      max="2048"
+                      step="16"
+                      value={dimensions.width}
+                      onChange={(e) => handleDimensionChange('width', e.target.value)}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
+                  <div className="w-1/2">
+                    <input 
+                      type="range"
+                      min="512"
+                      max="2048"
+                      step="16"
+                      value={dimensions.height}
+                      onChange={(e) => handleDimensionChange('height', e.target.value)}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">高度</label>
-                  <input 
-                    type="number" 
-                    className={`w-full border ${!validateDimensions() ? 'border-red-300' : 'border-gray-300'} rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                    value={dimensions.height}
-                    onChange={(e) => handleDimensionChange('height', e.target.value)}
-                    step="16"
-                    min="512"
-                    max="2048"
-                  />
-                </div>
-              </div>
-              {!validateDimensions() && (
-                <p className="text-xs text-red-500 mt-1">
-                  {(subModel || model).startsWith("gpt-image-1") ? 
-                    "GPT-Image-1 仅支持 1024x1024、1536x1024、1024x1536 这三种尺寸" : 
-                    (subModel || model).startsWith("dall-e-3") ? 
-                    "DALL-E 3 仅支持 1024x1024、1792x1024、1024x1792 这三种尺寸" : 
-                    (subModel || model) === "dall-e-2" ? 
-                    "DALL-E 2 仅支持 256x256、512x512、1024x1024 这三种尺寸" : 
-                    "尺寸需在512-2048之间，且被16整除，总像素数不超过2^21"}
-                </p>
-              )}
-              
-              {/* 显示当前模型支持的尺寸列表 */}
-              <div className="mt-2">
-                <p className="text-xs text-gray-500">
-                  {(subModel || model).startsWith("gpt-image-1") || 
-                   (subModel || model).startsWith("dall-e-3") || 
-                   (subModel || model) === "dall-e-2" ? 
-                    "当前模型支持的尺寸：" : ""}
-                </p>
+                
+                {/* 错误提示 */}
+                {!validateDimensions() && (
+                  <p className="text-xs text-red-500 mb-1">
+                    {(subModel || model).startsWith("gpt-image-1") ? 
+                      "GPT-Image-1 仅支持 1024x1024、1536x1024、1024x1536" : 
+                      (subModel || model).startsWith("dall-e-3") ? 
+                      "DALL-E 3 仅支持 1024x1024、1792x1024、1024x1792" : 
+                      (subModel || model) === "dall-e-2" ? 
+                      "DALL-E 2 仅支持 256x256、512x512、1024x1024" : 
+                      "尺寸需在512-2048间且被16整除"}
+                  </p>
+                )}
+                
+                {/* 支持的预设尺寸 */}
                 {((subModel || model).startsWith("gpt-image-1") || 
                   (subModel || model).startsWith("dall-e-3") || 
                   (subModel || model) === "dall-e-2") && (
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <div className="flex flex-wrap gap-1 mb-1">
                     {getModelSupportedSizes(subModel || model).map((size, index) => (
                       <button 
                         key={index} 
-                        className={`text-xs px-2 py-1 rounded-md ${
+                        className={`text-xs px-2 py-0.5 rounded ${
                           dimensions.width === size.width && dimensions.height === size.height 
                             ? 'bg-blue-100 text-blue-700' 
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -1250,53 +1280,30 @@ const Index = () => {
               </div>
             </div>
             
-            {/* 图片数量选择 */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                生成数量
-              </label>
-              <div className="relative">
-                <select
-                  className="w-full appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-10 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-                  value={imageCount}
-                  onChange={(e) => setImageCount(Number(e.target.value))}
-                >
-                  <option value="1">1张</option>
-                  <option value="2">2张</option>
-                  <option value="3">3张</option>
-                  <option value="4">4张</option>
-                  <option value="5">5张</option>
-                  <option value="6">6张</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
-                  <ChevronDown size={16} />
-                </div>
-              </div>
+            <div className="p-4 text-center text-xs text-gray-400 border-t border-gray-200 flex items-center justify-center gap-2">
+              <span>© {new Date().getFullYear()} Powered by Lovable</span>
+              <span>|</span>
+              <a 
+                href="https://github.com/kevin1sMe/paintbot-hub" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-gray-500 hover:text-gray-700 flex items-center gap-1"
+              >
+                <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                <span>GitHub</span>
+              </a>
             </div>
-          </div>
-          
-          <div className="p-4 text-center text-xs text-gray-400 border-t border-gray-200 flex items-center justify-center gap-2">
-            <span>© {new Date().getFullYear()} Powered by Lovable</span>
-            <span>|</span>
-            <a 
-              href="https://github.com/kevin1sMe/paintbot-hub" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-gray-500 hover:text-gray-700 flex items-center gap-1"
-            >
-              <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-              </svg>
-              <span>GitHub</span>
-            </a>
           </div>
         </div>
 
-        {/* 右侧图片预览区域 - 调整为浅色背景和右上角时间 */}
-        <div className="flex-1 bg-gray-50 overflow-auto flex flex-col">
-          <div className="p-4 flex-1">
+        {/* 右侧图片预览区域 - 调整为弹性布局确保历史记录始终可见 */}
+        <div className="flex-1 bg-gray-50 flex flex-col overflow-hidden">
+          {/* 滚动区域只应用于主内容，不包括历史记录 */}
+          <div className="p-4 flex-1 overflow-y-auto min-h-0 content-height">
             {generatedImages.length > 0 || pendingImages > 0 ? (
-              <div>
+                      <div>
                 {/* 顶部信息区 - 模型和尺寸 */}
                 <div className="flex items-center mb-3 text-gray-800">
                   <div className="bg-blue-500 text-white p-1.5 rounded-full mr-2">
@@ -1333,7 +1340,7 @@ const Index = () => {
                       
                       {/* 图片操作按钮组 - 放在图片上并默认隐藏，hover时显示 */}
                       <div className="absolute right-2 top-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
+                            <button 
                           className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full"
                           onClick={() => {
                             navigator.clipboard.writeText(image.imgUrl);
@@ -1487,52 +1494,123 @@ const Index = () => {
             )}
           </div>
           
-          {/* 历史记录区域 */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-medium text-gray-700">历史记录</h3>
-              {history.length > 0 && (
-                <button 
-                  className="text-xs text-gray-500 hover:text-gray-700"
-                  onClick={() => {
-                    setHistory([]);
-                    saveHistoryToLocalStorage([]);
-                  }}
+          {/* 历史记录区域 - 现在使用固定底部设计 */}
+          <div className={`border-t border-gray-200 bg-white flex-shrink-0 history-container md:max-h-[150px] overflow-hidden mobile-history ${
+            historyCollapsed 
+              ? 'max-h-[40px] min-h-[40px]' 
+              : 'max-h-[150px] min-h-[100px] md:min-h-[120px]'
+          }`}>
+            <div className="flex justify-between items-center p-3 cursor-pointer" 
+                 onClick={() => setHistoryCollapsed(!historyCollapsed)}>
+              <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                <span>历史记录</span>
+                {history.length > 0 && (
+                  <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full">
+                    {history.length}
+                  </span>
+                )}
+              </h3>
+              <div className="flex gap-2 items-center">
+                {!historyCollapsed && history.length > 0 && (
+                  <button 
+                    className="text-xs text-gray-500 hover:text-gray-700"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm("确定要清空所有历史记录吗？此操作不可恢复。")) {
+                        setHistory([]);
+                        saveHistoryToLocalStorage([]);
+                        toast({ title: "历史记录已清空" });
+                      }
+                    }}
+                  >
+                    清空
+                  </button>
+                )}
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className={`text-gray-400 transform transition-transform ${historyCollapsed ? 'rotate-180' : ''}`}
                 >
-                  清空
-                </button>
-              )}
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </div>
             </div>
             
-            {history.length > 0 ? (
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                {history.map((item, index) => (
-                  <div key={index} className="relative min-w-[100px] flex-shrink-0 cursor-pointer hover:opacity-90 transform hover:scale-105 transition-all">
-                    <img 
-                      src={item.imgUrl} 
-                      alt={item.prompt} 
-                      className="w-[100px] h-[100px] object-cover rounded-md border border-gray-200"
-                      onClick={() => handleHistoryItemClick(item)} 
-                    />
-                    {/* 多图标记 */}
-                    {item.imageCount && item.imageCount > 1 && (
-                      <div className="absolute top-1 right-1 bg-black bg-opacity-60 text-white rounded-md px-1 text-xs">
-                        {item.imageCount}张
+            {!historyCollapsed && (
+              <div className="px-4 pb-3 overflow-y-auto overflow-scroll-fix" style={{maxHeight: "100px"}}>
+                {history.length > 0 ? (
+                  <div className="flex gap-3 overflow-x-auto pb-2">
+                    {history.map((item, index) => (
+                      <div key={index} className="relative min-w-[100px] flex-shrink-0 cursor-pointer hover:opacity-90 transform hover:scale-105 transition-all group">
+                        <img 
+                          src={item.imgUrl} 
+                          alt={item.prompt} 
+                          className="w-[100px] h-[100px] object-cover rounded-md border border-gray-200"
+                          onClick={() => handleHistoryItemClick(item)} 
+                        />
+                        {/* 多图标记 */}
+                        {item.imageCount && item.imageCount > 1 && (
+                          <div className="absolute top-1 right-1 bg-black bg-opacity-60 text-white rounded-md px-1 text-xs">
+                            {item.imageCount}张
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 truncate rounded-b-md">
+                          {item.prompt.substring(0, 10)}{item.prompt.length > 10 ? '...' : ''}
+                        </div>
+                        
+                        {/* 悬停显示更多信息 - 添加点击事件以支持点击功能 */}
+                        <div 
+                          className="absolute inset-0 bg-black bg-opacity-75 rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2 text-white text-xs"
+                          onClick={() => handleHistoryItemClick(item)}
+                        >
+                          <div className="flex justify-between">
+                            <span>{item.model.split('-').pop()}</span>
+                            <span>{item.size}</span>
+                          </div>
+                          <div className="overflow-hidden">
+                            <p className="line-clamp-3 text-xs leading-tight">{item.prompt}</p>
+                          </div>
+                          <div className="flex justify-between mt-1">
+                            <span>{item.time.split(' ')[1]}</span>
+                            <button
+                              className="text-xs text-red-300 hover:text-red-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm("确定要删除这条记录吗？")) {
+                                  const newHistory = history.filter((_, i) => i !== index);
+                                  setHistory(newHistory);
+                                  saveHistoryToLocalStorage(newHistory);
+                                  toast({ title: "已删除该记录" });
+                                }
+                              }}
+                            >
+                              删除
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 truncate rounded-b-md">
-                      {item.prompt.substring(0, 10)}{item.prompt.length > 10 ? '...' : ''}
-                    </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="flex items-center justify-center py-4 text-gray-500">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+                      <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="text-sm">暂无历史记录，生成的图片将自动保存在这里</span>
+                  </div>
+                )}
               </div>
-            ) : (
-              <p className="text-xs text-gray-500">暂无历史记录</p>
             )}
           </div>
           
-          {/* 调试面板按钮 - 移至右下角 */}
-          <div className="absolute bottom-4 right-4">
+          {/* 调试面板按钮 - 位置调整 */}
+          <div className="fixed bottom-4 right-4 z-20">
             <button
               className="bg-white shadow border text-gray-700 hover:bg-gray-50 px-3 py-1.5 rounded text-sm flex items-center gap-1"
               onClick={() => document.getElementById('debug-panel')?.classList.toggle('hidden')}
@@ -1549,6 +1627,12 @@ const Index = () => {
       {/* 调试面板内容 - 保持隐藏状态 */}
       <div id="debug-panel" className="hidden">
         <DebugPanel logs={logs} clearLogs={clearLogs} />
+      </div>
+      
+      {/* 显示调试信息 */}
+      <div className="debug-info">
+        inner: {typeof window !== 'undefined' ? window.innerHeight : 0}px, 
+        outer: {typeof window !== 'undefined' ? window.outerHeight : 0}px
       </div>
     </div>
   );
