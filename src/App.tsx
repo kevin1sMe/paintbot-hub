@@ -19,8 +19,8 @@ const App = () => {
       
       // 设置一个额外的变量用于内容区域，减去顶部和底部的固定区域
       // 这里可以根据实际项目中顶部和底部区域的高度进行调整
-      const headerHeight = 70; // 估计的顶部区域高度
-      const historyHeight = 140; // 估计的历史记录区域高度
+      const headerHeight = 75; // 估计的顶部区域高度
+      const historyHeight = 160; // 估计的历史记录区域高度
       const contentHeight = (window.innerHeight - headerHeight - historyHeight) * 0.01;
       document.documentElement.style.setProperty('--content-vh', `${contentHeight}px`);
       

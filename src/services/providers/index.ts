@@ -10,7 +10,7 @@ import { CogviewProvider } from './cogview';
 import { OpenAIProvider } from './openai';
 import { WanxProvider } from './wanx';
 import { QianfanProvider } from './qianfan';
-import { DoubaImgProvider } from './doubaimg';
+import { DoubaoImgProvider } from './doubaoimg';
 
 // 缓存实例，避免重复创建
 const providerInstances = new Map<string, ModelProvider>();
@@ -48,9 +48,9 @@ export function getProvider(providerType: string, options: ProviderOptions = {})
     case 'qianfan':
       provider = new QianfanProvider(config);
       break;
-    case 'doubaimg':
+    case 'doubaoimg':
       // 假设火山引擎豆包正在开发中，但仍然创建实例以供UI展示
-      provider = new DoubaImgProvider(config);
+      provider = new DoubaoImgProvider(config);
       break;
     default:
       // 对于未实现的提供者，返回通用实现
@@ -75,8 +75,8 @@ export function getProviderByModel(modelId: string, options: ProviderOptions = {
     return getProvider('wanx2', options);
   } else if (modelId === 'irag-1.0' || modelId === 'flux.1-schnell') {
     return getProvider('qianfan', options);
-  } else if (modelId.startsWith('doubaimg-')) {
-    return getProvider('doubaimg', options);
+  } else if (modelId.startsWith('doubaoimg-')) {
+    return getProvider('doubaoimg', options);
   } else {
     throw new Error(`不支持的模型: ${modelId}`);
   }
@@ -91,7 +91,7 @@ export function getAllProviders(options: ProviderOptions = {}): ModelProvider[] 
     getProvider('openai', options),
     getProvider('wanx2', options),
     getProvider('qianfan', options),
-    getProvider('doubaimg', options)
+    getProvider('doubaoimg', options)
   ];
 }
 

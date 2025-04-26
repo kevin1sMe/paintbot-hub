@@ -4,16 +4,19 @@
 
 /* 安全提示样式 */
 .security-banner {
-  max-width: 60%;
-  min-width: 280px;
   display: flex;
   align-items: center;
-  margin-left: 0; /* 调整位置 */
+  white-space: nowrap;
+  padding-left: 8px; /* 从左侧稍微缩进一点 */
 }
 
 .security-banner span {
   position: relative;
   transition: opacity 0.5s ease;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+  width: 100%;
 }
 
 /* 使用动态计算的视口高度 */
@@ -56,18 +59,17 @@
   overscroll-behavior: contain;
 }
 
-/* 调试信息 */
-.debug-info {
-  position: fixed;
-  bottom: 60px;
-  right: 10px;
-  font-size: 10px;
-  background: rgba(0,0,0,0.5);
-  color: white;
-  padding: 5px;
-  border-radius: 4px;
-  z-index: 9999;
-  pointer-events: none;
+/* 底部版权区域 */
+.footer-copyright {
+  /* 使用历史记录高度变量，确保紧贴历史记录区域 */
+  margin-top: auto;
+}
+
+/* 自适应高度的主内容区 */
+.flex-adaptive {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 1024px) {
@@ -79,11 +81,10 @@
 
 @media (max-width: 768px) {
   .security-banner {
-    max-width: 45%;
-    min-width: 200px;
+    margin-right: 65px; /* 为调试按钮留出更多空间 */
   }
   
-  /* 在移动设备上优化历史记录区域 */
+  /* 移动设备上优化历史记录区域 */
   .mobile-history {
     position: sticky;
     bottom: 0;

@@ -895,20 +895,36 @@ const Index = () => {
       <LayoutAdjuster />
       
       {/* 顶部带安全提示的导航栏 */}
-      <div className="bg-gradient-to-r from-blue-50 via-white to-indigo-50 border border-red-200 rounded-lg mx-4 mt-4 mb-1 py-3 px-4 shadow-sm flex-shrink-0">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      <div className="bg-gradient-to-r from-blue-50 via-white to-indigo-50 border border-red-200 rounded-lg mx-4 mt-4 mb-1 py-4 px-4 shadow-sm flex-shrink-0 relative">
+        <div className="max-w-7xl mx-auto w-full flex items-center">
+          {/* 左侧Logo部分，占据0.618前的空间 */}
+          <div className="flex items-center gap-2 w-[61.8%] md:w-[61.8%] pr-2">
             <img src="/logo.png" alt="Logo" className="h-8 w-auto rounded-lg" />
-            <span className="text-xl font-bold tracking-tight text-gray-800">一站式AI绘图平台</span>
+            <span className="text-xl font-bold tracking-tight text-gray-800 truncate">一站式AI绘图平台</span>
           </div>
-          <div className="security-banner">
-            <div className="flex items-center">
-              <span className="text-xs text-blue-600 font-medium">
-                {securityTips[currentTip]}
-              </span>
+          
+          {/* 右侧Tips部分，从黄金比例(0.618)位置开始 */}
+          <div className="w-[38.2%] pr-20">
+            <div className="security-banner w-full">
+              <div className="flex items-center">
+                <span className="text-xs text-blue-600 font-medium truncate">
+                  {securityTips[currentTip]}
+                </span>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* 调试面板按钮 - 固定在右上角 */}
+        <button
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow border text-gray-700 hover:bg-gray-50 px-3 py-1.5 rounded text-sm flex items-center gap-1 z-10"
+          onClick={() => document.getElementById('debug-panel')?.classList.toggle('hidden')}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0 0V8m0 4h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          调试
+        </button>
       </div>
 
       {/* 设置面板 - 条件渲染 */}
@@ -1279,27 +1295,11 @@ const Index = () => {
                 )}
               </div>
             </div>
-            
-            <div className="p-4 text-center text-xs text-gray-400 border-t border-gray-200 flex items-center justify-center gap-2">
-              <span>© {new Date().getFullYear()} Powered by Lovable</span>
-              <span>|</span>
-              <a 
-                href="https://github.com/kevin1sMe/paintbot-hub" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-gray-500 hover:text-gray-700 flex items-center gap-1"
-              >
-                <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-                </svg>
-                <span>GitHub</span>
-              </a>
-            </div>
           </div>
         </div>
 
         {/* 右侧图片预览区域 - 调整为弹性布局确保历史记录始终可见 */}
-        <div className="flex-1 bg-gray-50 flex flex-col overflow-hidden">
+        <div className="flex-1 bg-gray-50 flex flex-col overflow-hidden flex-adaptive">
           {/* 滚动区域只应用于主内容，不包括历史记录 */}
           <div className="p-4 flex-1 overflow-y-auto min-h-0 content-height">
             {generatedImages.length > 0 || pendingImages > 0 ? (
@@ -1495,10 +1495,10 @@ const Index = () => {
           </div>
           
           {/* 历史记录区域 - 现在使用固定底部设计 */}
-          <div className={`border-t border-gray-200 bg-white flex-shrink-0 history-container md:max-h-[150px] overflow-hidden mobile-history ${
+          <div className={`border-t border-gray-200 bg-white flex-shrink-0 history-container md:max-h-[160px] overflow-hidden mobile-history ${
             historyCollapsed 
               ? 'max-h-[40px] min-h-[40px]' 
-              : 'max-h-[150px] min-h-[100px] md:min-h-[120px]'
+              : 'max-h-[160px] min-h-[110px] md:min-h-[130px]'
           }`}>
             <div className="flex justify-between items-center p-3 cursor-pointer" 
                  onClick={() => setHistoryCollapsed(!historyCollapsed)}>
@@ -1535,15 +1535,20 @@ const Index = () => {
                   strokeWidth="2" 
                   strokeLinecap="round" 
                   strokeLinejoin="round"
-                  className={`text-gray-400 transform transition-transform ${historyCollapsed ? 'rotate-180' : ''}`}
+                  className="text-gray-400"
                 >
-                  <polyline points="18 15 12 9 6 15"></polyline>
+                  {/* 根据折叠状态显示不同的箭头方向 */}
+                  {historyCollapsed ? (
+                    <polyline points="6 15 12 9 18 15"></polyline> // 收起状态时显示向下的箭头，表示可展开
+                  ) : (
+                    <polyline points="6 9 12 15 18 9"></polyline> // 展开状态时显示向上的箭头，表示可收起
+                  )}
                 </svg>
               </div>
             </div>
             
             {!historyCollapsed && (
-              <div className="px-4 pb-3 overflow-y-auto overflow-scroll-fix" style={{maxHeight: "100px"}}>
+              <div className="px-4 pb-3 overflow-y-auto overflow-scroll-fix" style={{maxHeight: "110px"}}>
                 {history.length > 0 ? (
                   <div className="flex gap-3 overflow-x-auto pb-2">
                     {history.map((item, index) => (
@@ -1552,7 +1557,10 @@ const Index = () => {
                           src={item.imgUrl} 
                           alt={item.prompt} 
                           className="w-[100px] h-[100px] object-cover rounded-md border border-gray-200"
-                          onClick={() => handleHistoryItemClick(item)} 
+                          onClick={(e) => {
+                            e.stopPropagation(); // 阻止事件冒泡到外层div，避免触发收起操作
+                            handleHistoryItemClick(item);
+                          }} 
                         />
                         {/* 多图标记 */}
                         {item.imageCount && item.imageCount > 1 && (
@@ -1567,7 +1575,10 @@ const Index = () => {
                         {/* 悬停显示更多信息 - 添加点击事件以支持点击功能 */}
                         <div 
                           className="absolute inset-0 bg-black bg-opacity-75 rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2 text-white text-xs"
-                          onClick={() => handleHistoryItemClick(item)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // 阻止事件冒泡到外层div，避免触发收起操作
+                            handleHistoryItemClick(item);
+                          }}
                         >
                           <div className="flex justify-between">
                             <span>{item.model.split('-').pop()}</span>
@@ -1609,30 +1620,30 @@ const Index = () => {
             )}
           </div>
           
-          {/* 调试面板按钮 - 位置调整 */}
-          <div className="fixed bottom-4 right-4 z-20">
-            <button
-              className="bg-white shadow border text-gray-700 hover:bg-gray-50 px-3 py-1.5 rounded text-sm flex items-center gap-1"
-              onClick={() => document.getElementById('debug-panel')?.classList.toggle('hidden')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0 0V8m0 4h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              调试
-            </button>
-          </div>
+          {/* 调试按钮已移至顶部导航栏 */}
         </div>
+      </div>
+      
+      {/* 版权信息 - 移至页面最底部 */}
+      <div className="bg-white border-t border-gray-200 py-4 px-4 text-center text-xs text-gray-400 flex items-center justify-center gap-2 w-full flex-shrink-0 footer-copyright">
+        <span>© {new Date().getFullYear()} Powered by Lovable</span>
+        <span>|</span>
+        <a 
+          href="https://github.com/kevin1sMe/paintbot-hub" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-gray-500 hover:text-gray-700 flex items-center gap-1"
+        >
+          <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          <span>GitHub</span>
+        </a>
       </div>
       
       {/* 调试面板内容 - 保持隐藏状态 */}
       <div id="debug-panel" className="hidden">
         <DebugPanel logs={logs} clearLogs={clearLogs} />
-      </div>
-      
-      {/* 显示调试信息 */}
-      <div className="debug-info">
-        inner: {typeof window !== 'undefined' ? window.innerHeight : 0}px, 
-        outer: {typeof window !== 'undefined' ? window.outerHeight : 0}px
       </div>
     </div>
   );

@@ -20,17 +20,16 @@ const LayoutAdjuster: React.FC = () => {
         document.documentElement.style.setProperty('--doc-height', `${docHeight}px`);
         
         // 计算历史区和主内容区的高度
-        const headerHeight = 80; // 大致的头部高度
-        const historyHeight = 150; // 历史记录区高度
+        const headerHeight = 85; // 调整后的头部高度
+        
+        // 检查历史记录的当前状态
+        const historyIsCollapsed = document.querySelector('.history-container')?.classList.contains('max-h-[40px]');
+        const historyHeight = historyIsCollapsed ? 40 : 160; // 根据历史记录的展开状态设置高度
+        
         const mainContentHeight = windowHeight - headerHeight - historyHeight;
         
         document.documentElement.style.setProperty('--main-height', `${mainContentHeight}px`);
-        
-        // 更新调试信息
-        const debugInfo = document.querySelector('.debug-info');
-        if (debugInfo) {
-          debugInfo.textContent = `window: ${windowHeight}px, doc: ${docHeight}px, main: ${mainContentHeight}px`;
-        }
+        document.documentElement.style.setProperty('--history-height', `${historyHeight}px`);
       }, 100);
     };
     
@@ -42,11 +41,22 @@ const LayoutAdjuster: React.FC = () => {
     window.addEventListener('orientationchange', setRealHeight);
     window.addEventListener('scroll', setRealHeight);
     
+    // 添加监听历史记录展开/收起事件
+    const historyObserver = new MutationObserver(setRealHeight);
+    const historyElement = document.querySelector('.history-container');
+    if (historyElement) {
+      historyObserver.observe(historyElement, { 
+        attributes: true, 
+        attributeFilter: ['class'] 
+      });
+    }
+    
     // 清理
     return () => {
       window.removeEventListener('resize', setRealHeight);
       window.removeEventListener('orientationchange', setRealHeight);
       window.removeEventListener('scroll', setRealHeight);
+      historyObserver.disconnect();
     };
   }, []);
   

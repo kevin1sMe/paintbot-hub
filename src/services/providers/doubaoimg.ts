@@ -12,7 +12,7 @@ import {
   computeSignature
 } from '../utils';
 
-export class DoubaImgProvider extends BaseModelProvider {
+export class DoubaoImgProvider extends BaseModelProvider {
   constructor(config: ModelProviderConfig) {
     super(config);
   }
@@ -52,7 +52,7 @@ export class DoubaImgProvider extends BaseModelProvider {
     }
     
     // 根据模型ID选择合适的参数
-    if (model === 'doubaimg-text2img-v2.1') {
+    if (model === 'doubaoimg-text2img-v2.1') {
       // 通用2.1模型
       requestBody.req_key = 'high_aes_general_v21_L';
       requestBody.req_schedule_conf = 'general_v20_9B_pe'; // 默认美感版
@@ -60,7 +60,7 @@ export class DoubaImgProvider extends BaseModelProvider {
       requestBody.scale = 3.5;
       requestBody.ddim_steps = 25;
       requestBody.use_pre_llm = true;
-    } else if (model === 'doubaimg-text2img-v2.0pro') {
+    } else if (model === 'doubaoimg-text2img-v2.0pro') {
       // 通用2.0Pro模型
       requestBody.req_key = 'high_aes_general_v20_L';
       requestBody.req_schedule_conf = 'general_v20_9B_pe'; // 默认美感版
@@ -414,7 +414,7 @@ export class DoubaImgProvider extends BaseModelProvider {
    */
   private getApiProxy(): string {
     // 获取用户自定义代理URL，如果有的话
-    const customProxy = localStorage.getItem('doubaimg_proxy');
+    const customProxy = localStorage.getItem('doubaoimg_proxy');
     if (customProxy) {
       return customProxy;
     }
@@ -433,7 +433,7 @@ export class DoubaImgProvider extends BaseModelProvider {
     ];
     
     // 默认使用第一个代理
-    const selectedProxy = localStorage.getItem('doubaimg_selected_proxy') || '0';
+    const selectedProxy = localStorage.getItem('doubaoimg_selected_proxy') || '0';
     const proxyIndex = parseInt(selectedProxy, 10);
     
     if (proxyIndex === 0) {
@@ -449,7 +449,7 @@ export class DoubaImgProvider extends BaseModelProvider {
    * @param proxyIndex 代理索引 (0: cors-anywhere, 1: allorigins, 2: corsproxy.io)
    */
   setCorsProxy(proxyIndex: number): void {
-    localStorage.setItem('doubaimg_selected_proxy', proxyIndex.toString());
+    localStorage.setItem('doubaoimg_selected_proxy', proxyIndex.toString());
     const proxies = [
       'CORS Anywhere (需先访问 https://cors-anywhere.herokuapp.com/corsdemo 激活)',
       'AllOrigins',
@@ -463,7 +463,7 @@ export class DoubaImgProvider extends BaseModelProvider {
    * @param proxyUrl 完整的代理URL，如 https://your-proxy.com/
    */
   setCustomCorsProxy(proxyUrl: string): void {
-    localStorage.setItem('doubaimg_proxy', proxyUrl);
+    localStorage.setItem('doubaoimg_proxy', proxyUrl);
     console.info(`已设置自定义代理: ${proxyUrl}`);
   }
 
@@ -471,8 +471,8 @@ export class DoubaImgProvider extends BaseModelProvider {
    * 清除所有代理设置，恢复默认
    */
   clearCorsProxy(): void {
-    localStorage.removeItem('doubaimg_proxy');
-    localStorage.removeItem('doubaimg_selected_proxy');
+    localStorage.removeItem('doubaoimg_proxy');
+    localStorage.removeItem('doubaoimg_selected_proxy');
     console.info('已清除所有代理设置，恢复默认');
   }
 } 
