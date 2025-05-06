@@ -70,6 +70,8 @@ jobs:
     
     permissions:
       contents: write  # 用于创建release
+      actions: read    # 用于检查action状态
+      statuses: write  # 用于更新状态
     
     steps:
       - name: Checkout repository
