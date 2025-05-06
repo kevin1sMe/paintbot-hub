@@ -62,6 +62,9 @@ jobs:
     needs: build-and-push
     if: startsWith(github.ref, 'refs/tags/')
     
+    permissions:
+      contents: write  # 用于创建release
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
