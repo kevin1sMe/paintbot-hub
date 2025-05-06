@@ -8,9 +8,7 @@ on:
       - 'v*'
 
 # 为整个工作流设置默认最小权限
-permissions:
-  contents: read
-  packages: write
+permissions: {}  # 禁用所有默认权限
 
 env:
   REGISTRY: docker.io
@@ -24,7 +22,6 @@ jobs:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
     
     permissions:
-      contents: read
       packages: write
     
     steps:
