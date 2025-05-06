@@ -7,6 +7,9 @@ on:
     tags:
       - 'v*'
 
+# 为整个工作流设置默认最小权限
+permissions: {}  # 禁用所有默认权限
+
 env:
   REGISTRY: docker.io
   IMAGE_NAME: kevinlin86/paintbot-hub
@@ -17,6 +20,9 @@ jobs:
     
     # 确保只在main分支或tag时运行
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    
+    permissions:
+      packages: write
     
     steps:
       - name: Checkout repository
@@ -61,6 +67,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push
     if: startsWith(github.ref, 'refs/tags/')
+    
+    permissions:
+      contents: write  # 用于创建release
+      actions: read    # 用于检查action状态
+      statuses: write  # 用于更新状态
     
     steps:
       - name: Checkout repository
