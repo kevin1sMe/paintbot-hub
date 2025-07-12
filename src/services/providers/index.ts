@@ -11,6 +11,7 @@ import { OpenAIProvider } from './openai';
 import { WanxProvider } from './wanx';
 import { QianfanProvider } from './qianfan';
 import { DoubaoImgProvider } from './doubaoimg';
+import { MinimaxProvider } from './minimax';
 
 // 缓存实例，避免重复创建
 const providerInstances = new Map<string, ModelProvider>();
@@ -52,6 +53,9 @@ export function getProvider(providerType: string, options: ProviderOptions = {})
       // 假设火山引擎豆包正在开发中，但仍然创建实例以供UI展示
       provider = new DoubaoImgProvider(config);
       break;
+    case 'minimax':
+      provider = new MinimaxProvider(config);
+      break;
     default:
       // 对于未实现的提供者，返回通用实现
       provider = new NotImplementedProvider(config);
@@ -77,6 +81,8 @@ export function getProviderByModel(modelId: string, options: ProviderOptions = {
     return getProvider('qianfan', options);
   } else if (modelId.startsWith('doubaoimg-')) {
     return getProvider('doubaoimg', options);
+  } else if (modelId === 'image-01') {
+    return getProvider('minimax', options);
   } else {
     throw new Error(`不支持的模型: ${modelId}`);
   }
@@ -91,7 +97,8 @@ export function getAllProviders(options: ProviderOptions = {}): ModelProvider[] 
     getProvider('openai', options),
     getProvider('wanx2', options),
     getProvider('qianfan', options),
-    getProvider('doubaoimg', options)
+    getProvider('doubaoimg', options),
+    getProvider('minimax', options)
   ];
 }
 

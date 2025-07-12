@@ -64,6 +64,18 @@ export const MODELS: ModelProviderConfig[] = [
     ],
   },
   DOUBAO_MODEL,
+  {
+    name: "Minimax AI",
+    value: "minimax",
+    url: "https://www.minimax.io/platform/document",
+    apiKeyName: "minimax_key",
+    promptMaxLength: 2000, // Minimax提示词长度限制
+    promptSupportLang: "中文、英文",
+    negativePromptSupport: false,
+    children: [
+      { label: "image-01", value: "image-01", price: "待定", promptMaxLength: 2000, promptSupportLang: "中文、英文" },
+    ],
+  },
   // 未来可添加更多平台
 ];
 
