@@ -76,6 +76,19 @@ export const MODELS: ModelProviderConfig[] = [
       { label: "image-01", value: "image-01", price: "待定", promptMaxLength: 2000, promptSupportLang: "中文、英文" },
     ],
   },
+  {
+    name: "Google Gemini",
+    value: "gemini",
+    url: "https://ai.google.dev/gemini-api/docs/image-generation",
+    apiKeyName: "gemini_key",
+    promptMaxLength: 8000, // Gemini提示词长度限制
+    promptSupportLang: "英文、中文、日文、西班牙文、印地文",
+    negativePromptSupport: false,
+    children: [
+      { label: "Gemini 2.5 Flash Image", value: "gemini-2.5-flash-image", price: "约$0.039/张", promptMaxLength: 8000, promptSupportLang: "英文、中文、日文、西班牙文、印地文" },
+      { label: "Imagen 4", value: "imagen-4.0", price: "约$0.039/张", promptMaxLength: 8000, promptSupportLang: "英文、中文、日文、西班牙文、印地文" },
+    ],
+  },
   // 未来可添加更多平台
 ];
 

@@ -12,6 +12,7 @@ import { WanxProvider } from './wanx';
 import { QianfanProvider } from './qianfan';
 import { DoubaoImgProvider } from './doubaoimg';
 import { MinimaxProvider } from './minimax';
+import { GeminiProvider } from './gemini';
 
 // 缓存实例，避免重复创建
 const providerInstances = new Map<string, ModelProvider>();
@@ -56,6 +57,9 @@ export function getProvider(providerType: string, options: ProviderOptions = {})
     case 'minimax':
       provider = new MinimaxProvider(config);
       break;
+    case 'gemini':
+      provider = new GeminiProvider(config);
+      break;
     default:
       // 对于未实现的提供者，返回通用实现
       provider = new NotImplementedProvider(config);
@@ -83,6 +87,8 @@ export function getProviderByModel(modelId: string, options: ProviderOptions = {
     return getProvider('doubaoimg', options);
   } else if (modelId === 'image-01') {
     return getProvider('minimax', options);
+  } else if (modelId.startsWith('gemini-') || modelId.startsWith('imagen-')) {
+    return getProvider('gemini', options);
   } else {
     throw new Error(`不支持的模型: ${modelId}`);
   }
@@ -98,7 +104,8 @@ export function getAllProviders(options: ProviderOptions = {}): ModelProvider[] 
     getProvider('wanx2', options),
     getProvider('qianfan', options),
     getProvider('doubaoimg', options),
-    getProvider('minimax', options)
+    getProvider('minimax', options),
+    getProvider('gemini', options)
   ];
 }
 

@@ -34,6 +34,9 @@
 - [x] 火山引擎豆包（已上线） 2025-04-26
 - [x] Minimax AI（已上线）
   - image-01
+- [x] Google Gemini（已上线）
+  - Gemini 2.5 Flash Image
+  - Imagen 4
 - [ ] 腾讯云文生图（计划中）
 - [ ] 讯飞文生图（计划中）
 
@@ -57,6 +60,17 @@ docker run -d -p 8080:8080 kevinlin86/paintbot-hub:latest
 你可以本地编辑一个这样的文件，或者直接打开Github代码仓库中的[docker-compose.yml](https://github.com/kevin1sMe/paintbot-hub/blob/main/docker-compose.yml)文件并复制过来。
 
 参考`env.example`文件创建一个`.env`文件，修改其中的环境变量。KEY等写不写无所谓，若服务对外开放建议不写。
+
+支持的环境变量：
+- `PORT`: 服务端口（默认8080）
+- `OPENAI_API_KEY`: OpenAI API密钥
+- `OPENAI_API_BASE_URL`: OpenAI API基础URL（可选）
+- `ZHIPU_API_KEY`: 智谱AI密钥
+- `BAIDU_API_KEY`: 百度千帆密钥
+- `ALIYUN_WANX_KEY`: 阿里云通义万相密钥
+- `VOLCENGINE_KEY`: 火山引擎密钥（格式：AccessKey:SecretKey）
+- `GEMINI_API_KEY`: Google Gemini API密钥
+- `PROXY_URL`: 代理设置（可选）
 
 ```yaml
 services:
