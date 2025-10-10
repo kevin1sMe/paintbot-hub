@@ -87,7 +87,7 @@ export function getProviderByModel(modelId: string, options: ProviderOptions = {
     return getProvider('doubaoimg', options);
   } else if (modelId === 'image-01') {
     return getProvider('minimax', options);
-  } else if (modelId.startsWith('gemini-') || modelId.startsWith('imagen-')) {
+  } else if (modelId.startsWith('gemini-')) {
     return getProvider('gemini', options);
   } else {
     throw new Error(`不支持的模型: ${modelId}`);
