@@ -4,7 +4,7 @@
 
 import { BaseModelProvider } from './base';
 import { GenerateImageParams, ImageSize, ModelProviderConfig } from '../types';
-import { getTimestamp, maskAPIKey } from '../utils';
+import { getTimestamp, maskAPIKey, parseImageSize } from '../utils';
 
 export class GeminiProvider extends BaseModelProvider {
   constructor(config: ModelProviderConfig) {
@@ -26,14 +26,27 @@ export class GeminiProvider extends BaseModelProvider {
     // API端点
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-    // 构建请求体（Gemini 图片生成 API 暂不支持自定义尺寸参数）
-    const requestBody = {
+    // 解析图片尺寸，转换为 aspect_ratio 格式
+    const { width, height } = parseImageSize(imageSize);
+    const aspectRatio = this.getAspectRatio(width, height);
+
+    // 构建请求体
+    const requestBody: any = {
       contents: [{
         parts: [{
           text: prompt
         }]
       }]
     };
+
+    // 如果有自定义宽高比，添加到 generationConfig 中
+    if (aspectRatio && aspectRatio !== '1:1') {
+      requestBody.generationConfig = {
+        imageConfig: {
+          aspectRatio: aspectRatio
+        }
+      };
+    }
 
     // 记录请求（隐藏API key）
     addLog({
@@ -100,7 +113,7 @@ export class GeminiProvider extends BaseModelProvider {
 
   /**
    * 获取支持的尺寸
-   * 注意：Gemini 图片生成 API 目前不支持自定义尺寸，生成的图片为默认尺寸
+   * 根据官方文档：https://ai.google.dev/gemini-api/docs/image-generation
    */
   getSupportedSizes(model: string): ImageSize[] {
     // 安全检查：确保model是有效字符串
@@ -108,9 +121,51 @@ export class GeminiProvider extends BaseModelProvider {
       return [{ width: 1024, height: 1024 }];
     }
 
-    // Gemini 生成固定尺寸的图片，这里仅返回一个默认选项
+    // Gemini 支持的宽高比和对应的分辨率
     return [
-      { width: 1024, height: 1024 }, // 默认尺寸
+      { width: 1024, height: 1024 }, // 1:1
+      { width: 832, height: 1248 },  // 2:3
+      { width: 1248, height: 832 },  // 3:2
+      { width: 864, height: 1184 },  // 3:4
+      { width: 1184, height: 864 },  // 4:3
+      { width: 896, height: 1152 },  // 4:5
+      { width: 1152, height: 896 },  // 5:4
+      { width: 768, height: 1344 },  // 9:16
+      { width: 1344, height: 768 },  // 16:9
+      { width: 1536, height: 672 },  // 21:9
     ];
+  }
+
+  /**
+   * 将宽高转换为 aspect_ratio 格式
+   * 根据官方文档中支持的宽高比
+   */
+  private getAspectRatio(width: number, height: number): string {
+    const ratio = width / height;
+    const tolerance = 0.05; // 5% 容差
+
+    // 根据比例匹配对应的宽高比字符串
+    const ratioMap: { [key: string]: number } = {
+      '1:1': 1,
+      '2:3': 2 / 3,
+      '3:2': 3 / 2,
+      '3:4': 3 / 4,
+      '4:3': 4 / 3,
+      '4:5': 4 / 5,
+      '5:4': 5 / 4,
+      '9:16': 9 / 16,
+      '16:9': 16 / 9,
+      '21:9': 21 / 9,
+    };
+
+    // 找到最接近的宽高比
+    for (const [key, value] of Object.entries(ratioMap)) {
+      if (Math.abs(ratio - value) < tolerance) {
+        return key;
+      }
+    }
+
+    // 默认返回 1:1
+    return '1:1';
   }
 }
