@@ -6,13 +6,13 @@ import DebugPanel from "../components/DebugPanel";
 import LayoutAdjuster from "../components/LayoutAdjuster";
 import { toast } from "@/hooks/use-toast";
 import { Settings, ChevronDown, Eye, EyeOff, Copy, Check } from "lucide-react";
-import { 
-  MODELS, 
-  getAPIKey, 
-  setAPIKey, 
-  getProviderByModel, 
-  generateImage, 
-  LogEntry, 
+import {
+  MODELS,
+  getAPIKey,
+  setAPIKey,
+  getProviderByModel,
+  generateImage,
+  LogEntry,
   HistoryEntry as ImageHistoryEntry,
   getTimestamp as getFormattedTimestamp,
   isImageSizeSupported,
@@ -21,7 +21,10 @@ import {
   saveLogsToLocalStorage,
   loadLogsFromLocalStorage,
   saveHistoryToLocalStorage,
-  loadHistoryFromLocalStorage
+  loadHistoryFromLocalStorage,
+  saveUserPreferences,
+  loadUserPreferences,
+  UserPreferences
 } from "../services";
 
 // 生成的图片信息类型
@@ -359,20 +362,26 @@ async function fetchWanx2Image(prompt: string, model: string, apiKey: string, im
 }
 
 const Index = () => {
-  // 基本状态
-  const [model, setModel] = useState(DEFAULT_MODEL);
-  const [subModel, setSubModel] = useState(DEFAULT_SUB_MODEL);
-  
-  // 尺寸相关状态
-  const [selectedRatio, setSelectedRatio] = useState("4:3");
+  // 加载用户偏好设置
+  const userPrefs = loadUserPreferences();
+
+  // 基本状态 - 从用户偏好中恢复
+  const [model, setModel] = useState(userPrefs.model || DEFAULT_MODEL);
+  const [subModel, setSubModel] = useState(userPrefs.subModel || DEFAULT_SUB_MODEL);
+
+  // 尺寸相关状态 - 从用户偏好中恢复
+  const [selectedRatio, setSelectedRatio] = useState(userPrefs.selectedRatio || "4:3");
   const [dimensions, setDimensions] = useState(() => {
+    if (userPrefs.dimensions) {
+      return userPrefs.dimensions;
+    }
     const aspectRatio = ASPECT_RATIOS.find(r => r.value === "4:3")?.ratio || 4/3;
     return calculateDimensions(aspectRatio);
   });
 
-  // 生成相关状态
-  const [prompt, setPrompt] = useState("");
-  const [negativePrompt, setNegativePrompt] = useState("");
+  // 生成相关状态 - 从用户偏好中恢复
+  const [prompt, setPrompt] = useState(userPrefs.prompt || "");
+  const [negativePrompt, setNegativePrompt] = useState(userPrefs.negativePrompt || "");
   const [apiKeys, setApiKeys] = useState<Record<string, string>>(() => {
     // 从localStorage加载所有模型提供商的密钥
     return MODELS.reduce((acc, provider) => {
@@ -384,7 +393,7 @@ const Index = () => {
   const [imgUrl, setImgUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>(() => loadLogs());
-  const [imageCount, setImageCount] = useState(1);
+  const [imageCount, setImageCount] = useState(userPrefs.imageCount || 1);
   const [generatedImages, setGeneratedImages] = useState<Array<{
     imgUrl: string;
     timestamp: string;
@@ -492,11 +501,25 @@ const Index = () => {
       setDimensions(calculateDimensions(aspectRatio));
     }
   }, [selectedRatio]);
-  
+
   // 当模型或子模型变化时，检查并调整尺寸
   useEffect(() => {
     adjustDimensionsToModel();
   }, [model, subModel]);
+
+  // 保存用户偏好设置到 localStorage
+  useEffect(() => {
+    const preferences: UserPreferences = {
+      model,
+      subModel,
+      selectedRatio,
+      dimensions,
+      prompt,
+      negativePrompt,
+      imageCount
+    };
+    saveUserPreferences(preferences);
+  }, [model, subModel, selectedRatio, dimensions, prompt, negativePrompt, imageCount]);
 
   // 手动调整尺寸
   const handleDimensionChange = (key, value) => {

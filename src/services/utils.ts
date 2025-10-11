@@ -84,4 +84,37 @@ export function hexEncode(arrayBuffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(arrayBuffer))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
+}
+
+// 用户偏好设置类型
+export interface UserPreferences {
+  model?: string;
+  subModel?: string;
+  selectedRatio?: string;
+  dimensions?: { width: number; height: number };
+  prompt?: string;
+  negativePrompt?: string;
+  imageCount?: number;
+}
+
+const USER_PREFERENCES_KEY = 'user_preferences';
+
+// 保存用户偏好设置
+export function saveUserPreferences(preferences: UserPreferences): void {
+  try {
+    localStorage.setItem(USER_PREFERENCES_KEY, JSON.stringify(preferences));
+  } catch (error) {
+    console.error('保存用户偏好设置失败:', error);
+  }
+}
+
+// 加载用户偏好设置
+export function loadUserPreferences(): UserPreferences {
+  try {
+    const data = localStorage.getItem(USER_PREFERENCES_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch (error) {
+    console.error('加载用户偏好设置失败:', error);
+    return {};
+  }
 } 
