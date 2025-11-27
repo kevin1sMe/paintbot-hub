@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import AIModelSelector from "../components/AIModelSelector";
 import { Button } from "@/components/ui/button";
 import GeneratedImageCard from "../components/GeneratedImageCard";
@@ -186,15 +186,17 @@ async function fetchCogviewImage(prompt: string, model: string, apiKey: string, 
     const imgUrl = data?.data?.[0]?.url;
     if (!imgUrl) throw new Error("未获取到图片");
     return imgUrl;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
     // 已经在上面记录了HTTP错误，这里捕获其他错误
-    if (!error.message?.includes("API调用失败")) {
+    if (!message.includes("API调用失败")) {
       addLog({
         timestamp: getFormattedTimestamp(),
         type: "error",
         data: {
-          message: error.message,
-          stack: error.stack,
+          message,
+          stack,
         },
       });
     }
@@ -345,15 +347,17 @@ async function fetchWanx2Image(prompt: string, model: string, apiKey: string, im
     
     throw new Error("任务查询超时，请稍后在历史记录中查看结果");
     
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
     // 已经在上面记录了HTTP错误，这里捕获其他错误
-    if (!error.message?.includes("API调用失败") && !error.message?.includes("查询任务失败") && !error.message?.includes("任务执行失败")) {
+    if (!message.includes("API调用失败") && !message.includes("查询任务失败") && !message.includes("任务执行失败")) {
       addLog({
         timestamp: getFormattedTimestamp(),
         type: "error",
         data: {
-          message: error.message,
-          stack: error.stack,
+          message,
+          stack,
         },
       });
     }
@@ -466,7 +470,7 @@ const Index = () => {
   };
 
   // 根据模型和比例调整尺寸
-  const adjustDimensionsToModel = () => {
+  const adjustDimensionsToModel = useCallback(() => {
     const currentModelValue = subModel || model;
     
     // 如果是OpenAI模型，检查并调整尺寸
@@ -492,7 +496,7 @@ const Index = () => {
         });
       }
     }
-  };
+  }, [dimensions.height, dimensions.width, model, subModel]);
 
   // 选择比例
   useEffect(() => {
@@ -505,7 +509,7 @@ const Index = () => {
   // 当模型或子模型变化时，检查并调整尺寸
   useEffect(() => {
     adjustDimensionsToModel();
-  }, [model, subModel]);
+  }, [adjustDimensionsToModel, model, subModel]);
 
   // 保存用户偏好设置到 localStorage
   useEffect(() => {
@@ -747,11 +751,12 @@ const Index = () => {
         saveHistoryToLocalStorage(newHistory);
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       console.error('图片生成失败:', error);
-      toast({ 
-        title: "图片生成失败", 
-        description: error.message,
+      toast({
+        title: "图片生成失败",
+        description: message,
         variant: "destructive"
       });
       // 清除待处理图片
@@ -886,18 +891,9 @@ const Index = () => {
   };
 
   const [currentTip, setCurrentTip] = useState(0);
-  
+
   // 添加历史记录展开/折叠状态
   const [historyCollapsed, setHistoryCollapsed] = useState(false);
-  
-  // Tips切换效果
-  useEffect(() => {
-    const tipInterval = setInterval(() => {
-      setCurrentTip(prev => (prev + 1) % securityTips.length);
-    }, 5000); // 5秒切换一次
-    
-    return () => clearInterval(tipInterval);
-  }, []);
 
   const securityTips = [
     "🔒 所有数据均存储在本地，我们不会保存您的任何信息",
@@ -911,6 +907,15 @@ const Index = () => {
     "⭐ 如果喜欢的话，请在GitHub给我一个Star吧",
     "📋 通过历史记录可以查看之前的生成上下文哟"
   ];
+
+  // Tips切换效果
+  useEffect(() => {
+    const tipInterval = setInterval(() => {
+      setCurrentTip(prev => (prev + 1) % securityTips.length);
+    }, 5000); // 5秒切换一次
+
+    return () => clearInterval(tipInterval);
+  }, [securityTips.length]);
 
   return (
     <div className="real-min-h-screen bg-gray-100 flex flex-col w-full">

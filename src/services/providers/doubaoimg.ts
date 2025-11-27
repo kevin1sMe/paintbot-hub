@@ -38,7 +38,7 @@ export class DoubaoImgProvider extends BaseModelProvider {
     const { width, height } = parseImageSize(imageSize);
     
     // 构建请求体 - 根据不同版本的API设置不同的参数
-    const requestBody: any = {
+    const requestBody: Record<string, unknown> = {
       width: width || 512,
       height: height || 512,
       prompt: prompt,
@@ -279,9 +279,10 @@ export class DoubaoImgProvider extends BaseModelProvider {
         const blob = new Blob([byteArray], { type: 'image/jpeg' });
         
         return URL.createObjectURL(blob);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         // 检查是否是网络错误，以及是否还有重试机会
-        if (error.message === 'Failed to fetch' && retryCount < maxRetries) {
+        if (errorMessage === 'Failed to fetch' && retryCount < maxRetries) {
           retryCount++;
           
           addLog({
@@ -289,7 +290,7 @@ export class DoubaoImgProvider extends BaseModelProvider {
             type: "info",
             data: {
               message: `网络请求失败，正在进行第${retryCount}次重试...`,
-              originalError: error.message
+              originalError: errorMessage
             },
           });
           

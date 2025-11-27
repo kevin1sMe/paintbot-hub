@@ -22,7 +22,7 @@ export class WanxProvider extends BaseModelProvider {
     const url = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis";
 
     // 请求体
-    const requestBody: any = {
+    const requestBody: Record<string, unknown> = {
       model: model,
       input: {
         prompt: prompt,
@@ -165,7 +165,7 @@ export class WanxProvider extends BaseModelProvider {
       if (!imgUrl) throw new Error("未获取到图片URL");
       
       return imgUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleApiError(error, addLog);
     }
   }

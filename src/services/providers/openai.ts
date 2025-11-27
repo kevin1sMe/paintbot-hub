@@ -36,7 +36,7 @@ export class OpenAIProvider extends BaseModelProvider {
     let style = "vivid";
     
     // 请求体
-    const requestBody: any = {
+    const requestBody: Record<string, unknown> = {
       model: "dall-e-3",
       prompt: prompt,
       n: 1,
@@ -182,7 +182,7 @@ export class OpenAIProvider extends BaseModelProvider {
       
       // 获取图片URL
       return this.extractImageUrl(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleApiError(error, addLog);
     }
   }

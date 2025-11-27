@@ -91,7 +91,7 @@ export class CogviewProvider extends BaseModelProvider {
       const imgUrl = data?.data?.[0]?.url;
       if (!imgUrl) throw new Error("未获取到图片URL");
       return imgUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleApiError(error, addLog);
     }
   }
