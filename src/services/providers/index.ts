@@ -3,7 +3,7 @@
  * 创建和管理各种模型提供者实例
  */
 
-import { ModelProvider, ProviderOptions } from '../types';
+import { LogEntry, ModelProvider, ProviderOptions } from '../types';
 import { findModelConfig } from '../models';
 import { BaseModelProvider, NotImplementedProvider } from './base';
 import { CogviewProvider } from './cogview';
@@ -117,7 +117,7 @@ export async function generateImage(params: {
   model: string;
   apiKey: string;
   imageSize: string;
-  addLog: (entry: any) => void;
+  addLog: (entry: LogEntry) => void;
   negativePrompt?: string;
 }): Promise<string> {
   const { model, addLog } = params;

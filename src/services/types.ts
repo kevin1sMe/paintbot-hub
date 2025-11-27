@@ -6,7 +6,7 @@
 export interface LogEntry {
   timestamp: string;
   type: "request" | "response" | "error" | "info";
-  data: any;
+  data: unknown;
 }
 
 // 历史记录条目类型

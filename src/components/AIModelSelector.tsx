@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { MODELS } from "../services";
+import type { SubModelConfig } from "../services";
 
 type Props = {
   model: string;
@@ -17,7 +18,7 @@ export default function AIModelSelector({
 }: Props) {
   const activeModel = MODELS.find((m) => m.value === model || m.children?.some((sm) => sm.value === subModel));
   const showSubModels = !!activeModel?.children;
-  const [selectedSubModel, setSelectedSubModel] = useState<any>(null);
+  const [selectedSubModel, setSelectedSubModel] = useState<SubModelConfig | null>(null);
 
   // 当模型或子模型变化时，更新当前选中的子模型信息
   useEffect(() => {

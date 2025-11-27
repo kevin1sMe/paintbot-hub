@@ -95,7 +95,7 @@ export class MinimaxProvider extends BaseModelProvider {
       const imgUrl = data?.data?.image_urls?.[0];
       if (!imgUrl) throw new Error("未获取到图片URL");
       return imgUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleApiError(error, addLog);
     }
   }

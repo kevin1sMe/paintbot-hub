@@ -31,7 +31,7 @@ export class GeminiProvider extends BaseModelProvider {
     const aspectRatio = this.getAspectRatio(width, height);
 
     // 构建请求体
-    const requestBody: any = {
+    const requestBody: Record<string, unknown> = {
       contents: [{
         parts: [{
           text: prompt

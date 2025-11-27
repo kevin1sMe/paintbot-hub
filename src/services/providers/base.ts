@@ -101,15 +101,18 @@ export abstract class BaseModelProvider implements ModelProvider {
   /**
    * 处理API请求错误
    */
-  protected handleApiError(error: any, addLog: (entry: LogEntry) => void): never {
+  protected handleApiError(error: unknown, addLog: (entry: LogEntry) => void): never {
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+
     // 如果不是已记录的API错误，添加到日志
-    if (!error.message?.includes("API调用失败")) {
+    if (!message.includes("API调用失败")) {
       addLog({
         timestamp: new Date().toLocaleTimeString(),
         type: "error",
         data: {
-          message: error.message,
-          stack: error.stack,
+          message,
+          stack,
         },
       });
     }
@@ -119,8 +122,9 @@ export abstract class BaseModelProvider implements ModelProvider {
   /**
    * 从响应中提取图像URL
    */
-  protected extractImageUrl(data: any): string {
-    const imgUrl = data?.data?.[0]?.url || data?.data?.[0]?.b64_json;
+  protected extractImageUrl(data: unknown): string {
+    const candidates = (data as { data?: Array<{ url?: string; b64_json?: string }> }).data;
+    const imgUrl = candidates?.[0]?.url || candidates?.[0]?.b64_json;
     if (!imgUrl) throw new Error("未获取到图片URL");
     
     // 如果返回的是base64数据，则转换为数据URL

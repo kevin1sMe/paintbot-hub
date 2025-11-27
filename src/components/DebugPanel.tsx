@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-
-interface LogEntry {
-  timestamp: string;
-  type: "request" | "response" | "error" | "info";
-  data: any;
-}
+import type { LogEntry } from "@/services";
 
 interface Props {
   logs: LogEntry[];
