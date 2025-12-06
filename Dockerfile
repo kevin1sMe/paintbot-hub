@@ -18,9 +18,13 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
-# 创建非root用户
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx
+# 确保 nginx 用户和组存在（nginx:alpine 镜像已包含，但确保 ID 正确）
+RUN if ! getent group nginx > /dev/null 2>&1; then \
+        addgroup -g 1001 -S nginx; \
+    fi && \
+    if ! getent passwd nginx > /dev/null 2>&1; then \
+        adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx; \
+    fi
 
 # Copy the built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
