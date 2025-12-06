@@ -86,6 +86,7 @@ export const MODELS: ModelProviderConfig[] = [
     negativePromptSupport: false,
     children: [
       { label: "Gemini 2.5 Flash Image", value: "gemini-2.5-flash-image", price: "约$0.039/张", promptMaxLength: 8000, promptSupportLang: "英文、中文、日文、西班牙文、印地文" },
+      { label: "Gemini 3 Pro Image (Preview)", value: "gemini-3-pro-image-preview", price: "约$0.134/张", promptMaxLength: 8000, promptSupportLang: "英文、中文、日文、西班牙文、印地文" },
     ],
   },
   // 未来可添加更多平台

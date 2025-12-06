@@ -97,14 +97,14 @@ export default function GeneratedImageCard({ url, prompt, loading, width = 1024,
                 src={url} 
                 alt={prompt || "AI生成图片"} 
                 className="max-w-full max-h-[75vh] object-contain rounded cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={openImageOverlay}
+                onDoubleClick={openImageOverlay}
               />
               <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
                 {width}x{height}
               </div>
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
                 <div className="bg-black bg-opacity-50 text-white px-3 py-1.5 rounded text-sm">
-                  点击查看原图
+                  双击查看原图
                 </div>
               </div>
             </div>
@@ -152,7 +152,7 @@ export default function GeneratedImageCard({ url, prompt, loading, width = 1024,
       {/* 全屏浮层 */}
       {showFullImage && url && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 cursor-zoom-out"
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 cursor-pointer"
           onClick={() => setShowFullImage(false)}
           style={{ 
             position: 'fixed', 
@@ -168,7 +168,6 @@ export default function GeneratedImageCard({ url, prompt, loading, width = 1024,
               src={url} 
               alt={prompt || "AI生成图片"} 
               className="max-w-full max-h-full object-contain"
-              onClick={(e) => e.stopPropagation()} // 防止点击图片关闭浮层
             />
             <button
               className="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"

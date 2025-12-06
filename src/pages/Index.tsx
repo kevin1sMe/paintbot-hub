@@ -409,6 +409,10 @@ const Index = () => {
   // 配置面板状态
   const [showSettings, setShowSettings] = useState(false);
 
+  // 图片全屏预览状态
+  const [showFullImage, setShowFullImage] = useState(false);
+  const [fullImageUrl, setFullImageUrl] = useState("");
+
   // 添加状态用于记录生成时使用的模型
   const [generationInfo, setGenerationInfo] = useState({
     startTime: "",
@@ -855,6 +859,14 @@ const Index = () => {
     
     // 重置待处理图片数量
     setPendingImages(0);
+  };
+
+  // 打开全屏预览
+  const openImageOverlay = (url: string) => {
+    if (url) {
+      setFullImageUrl(url);
+      setShowFullImage(true);
+    }
   };
 
   const [apiKeyVisibility, setApiKeyVisibility] = useState<Record<string, boolean>>({});
@@ -1353,12 +1365,20 @@ const Index = () => {
                   {/* 已生成的图片 */}
                   {generatedImages.map((image, index) => (
                     <div key={`generated-${index}`} className="relative mb-4 group">
-                      <img 
-                        src={image.imgUrl} 
-                        alt={`生成图片 ${index+1}`} 
-                        className="w-[256px] object-contain rounded-md border border-gray-200" 
-                        style={{ height: 'auto' }}
-                      />
+                      <div className="relative cursor-pointer">
+                        <img 
+                          src={image.imgUrl} 
+                          alt={`生成图片 ${index+1}`} 
+                          className="w-[256px] object-contain rounded-md border border-gray-200" 
+                          style={{ height: 'auto' }}
+                          onDoubleClick={() => openImageOverlay(image.imgUrl)}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                          <div className="bg-black bg-opacity-50 text-white px-3 py-1.5 rounded text-sm backdrop-blur-sm">
+                            双击查看原图
+                          </div>
+                        </div>
+                      </div>
                       
                       {/* 生成时间和耗时 - 移到图片下方 */}
                       <div className="mt-2 text-xs text-gray-500 flex justify-between items-center">
@@ -1443,13 +1463,21 @@ const Index = () => {
                 </div>
 
                 {/* 生成的图片 - 调整缩略图尺寸 */}
-                <div className="mb-3 relative inline-block">
-                  <img 
-                    src={imgUrl} 
-                    alt={prompt || "AI生成图片"} 
-                    className="w-[256px] object-contain rounded-md border border-gray-200" 
-                    style={{ height: 'auto' }}
-                  />
+                <div className="mb-3 relative inline-block group">
+                  <div className="relative cursor-pointer">
+                    <img 
+                      src={imgUrl} 
+                      alt={prompt || "AI生成图片"} 
+                      className="w-[256px] object-contain rounded-md border border-gray-200" 
+                      style={{ height: 'auto' }}
+                      onDoubleClick={() => openImageOverlay(imgUrl)}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                      <div className="bg-black bg-opacity-50 text-white px-3 py-1.5 rounded text-sm backdrop-blur-sm">
+                        双击查看原图
+                      </div>
+                    </div>
+                  </div>
                   
                   {/* 生成时间和耗时 - 移到图片下方 */}
                   <div className="mt-2 text-xs text-gray-500 flex justify-between items-center w-full">
@@ -1673,6 +1701,47 @@ const Index = () => {
       <div id="debug-panel" className="hidden">
         <DebugPanel logs={logs} clearLogs={clearLogs} />
       </div>
+      {/* 全屏图片预览浮层 */}
+      {showFullImage && fullImageUrl && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 cursor-pointer"
+          onClick={() => setShowFullImage(false)}
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            animation: 'fadeIn 0.3s ease-in-out',
+            zIndex: 9999
+          }}
+        >
+          <div className="relative max-w-[95vw] max-h-[95vh] flex items-center justify-center">
+            <img 
+              src={fullImageUrl} 
+              alt="全屏预览" 
+              className="max-w-full max-h-full object-contain"
+            />
+            <button
+              className="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowFullImage(false);
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+          `}} />
+        </div>
+      )}
     </div>
   );
 };

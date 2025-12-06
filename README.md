@@ -36,6 +36,7 @@
   - image-01
 - [x] Google Gemini（已上线）
   - Gemini 2.5 Flash Image
+  - Gemini 3 Pro Image (Preview)
 - [ ] 腾讯云文生图（计划中）
 - [ ] 讯飞文生图（计划中）
 
