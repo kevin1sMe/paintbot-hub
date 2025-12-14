@@ -438,6 +438,33 @@ const Index = () => {
     saveLogs([]);
   }, []);
 
+  // 生成下载文件名（包含模型名和提示词关键词）
+  const generateFileName = (prompt: string, modelName: string) => {
+    // 提取提示词的前几个关键词（最多5个单词，总长度不超过30个字符）
+    const words = prompt
+      .toLowerCase()
+      .replace(/[^\w\s\u4e00-\u9fa5]/g, ' ') // 保留字母、数字、空格和中文
+      .trim()
+      .split(/\s+/)
+      .filter(word => word.length > 0)
+      .slice(0, 5); // 取前5个单词
+
+    let keywords = words.join('-');
+
+    // 限制关键词总长度
+    if (keywords.length > 30) {
+      keywords = keywords.substring(0, 30);
+      // 确保不会在单词中间截断
+      const lastDash = keywords.lastIndexOf('-');
+      if (lastDash > 0) {
+        keywords = keywords.substring(0, lastDash);
+      }
+    }
+
+    const timestamp = new Date().getTime();
+    return `ai-image-${modelName}-${keywords}-${timestamp}.png`;
+  };
+
   // 检查尺寸是否有效
   const validateDimensions = () => {
     const { width, height } = dimensions;
@@ -1401,16 +1428,39 @@ const Index = () => {
                             <rect x="8" y="2" width="8" height="4" rx="1" ry="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         </button>
-                        <button 
+                        <button
                           className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full"
-                          onClick={() => {
-                            const a = document.createElement('a');
-                            a.href = image.imgUrl;
-                            a.download = `ai-image-${new Date().getTime()}.png`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            toast({ title: "图片已下载" });
+                          onClick={async () => {
+                            try {
+                              // 先尝试使用 fetch + blob 方式（可以自定义文件名）
+                              const response = await fetch(image.imgUrl);
+                              const blob = await response.blob();
+                              const downloadUrl = window.URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = downloadUrl;
+                              a.download = generateFileName(prompt, image.usedModel);
+                              document.body.appendChild(a);
+                              a.click();
+                              window.URL.revokeObjectURL(downloadUrl);
+                              document.body.removeChild(a);
+                              toast({ title: "图片已下载" });
+                            } catch (e) {
+                              // 如果 fetch 失败（可能是 CORS 问题），回退到直接下载
+                              console.warn('Fetch 下载失败，尝试直接下载', e);
+                              try {
+                                const a = document.createElement('a');
+                                a.href = image.imgUrl;
+                                a.download = generateFileName(prompt, image.usedModel);
+                                a.target = '_blank';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                toast({ title: "图片已下载（文件名可能不同）" });
+                              } catch (err) {
+                                console.error('下载失败', err);
+                                toast({ title: "下载失败", description: "请直接右键图片另存为" });
+                              }
+                            }
                           }}
                           title="下载图片"
                         >
@@ -1509,17 +1559,40 @@ const Index = () => {
                         <rect x="8" y="2" width="8" height="4" rx="1" ry="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </button>
-                    <button 
+                    <button
                       className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full"
-                      onClick={() => {
+                      onClick={async () => {
                         if (!imgUrl) return;
-                        const a = document.createElement('a');
-                        a.href = imgUrl;
-                        a.download = `ai-image-${new Date().getTime()}.png`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        toast({ title: "图片已下载" });
+                        try {
+                          // 先尝试使用 fetch + blob 方式（可以自定义文件名）
+                          const response = await fetch(imgUrl);
+                          const blob = await response.blob();
+                          const downloadUrl = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = downloadUrl;
+                          a.download = generateFileName(prompt, generationInfo.usedModel);
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(downloadUrl);
+                          document.body.removeChild(a);
+                          toast({ title: "图片已下载" });
+                        } catch (e) {
+                          // 如果 fetch 失败（可能是 CORS 问题），回退到直接下载
+                          console.warn('Fetch 下载失败，尝试直接下载', e);
+                          try {
+                            const a = document.createElement('a');
+                            a.href = imgUrl;
+                            a.download = generateFileName(prompt, generationInfo.usedModel);
+                            a.target = '_blank';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            toast({ title: "图片已下载（文件名可能不同）" });
+                          } catch (err) {
+                            console.error('下载失败', err);
+                            toast({ title: "下载失败", description: "请直接右键图片另存为" });
+                          }
+                        }
                       }}
                       title="下载图片"
                     >
