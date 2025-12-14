@@ -97,10 +97,44 @@ export class GeminiProvider extends BaseModelProvider {
         data,
       });
 
-      // 提取图片数据
-      const imgData = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+      // 提取图片数据 - 支持多种响应格式
+      let imgData = null;
+
+      // 尝试格式1: 标准 Gemini 响应格式
+      if (data?.candidates?.[0]?.content?.parts?.[0]?.inlineData) {
+        imgData = data.candidates[0].content.parts[0].inlineData;
+      }
+      // 尝试格式2: 直接在响应根部
+      else if (data?.inlineData) {
+        imgData = data.inlineData;
+      }
+      // 尝试格式3: 在 parts 数组中
+      else if (data?.candidates?.[0]?.content?.parts) {
+        const parts = data.candidates[0].content.parts;
+        for (const part of parts) {
+          if (part.inlineData) {
+            imgData = part.inlineData;
+            break;
+          }
+        }
+      }
+
       if (!imgData || !imgData.data) {
-        throw new Error("未获取到图片数据");
+        // 添加更详细的错误信息
+        addLog({
+          timestamp: getTimestamp(),
+          type: "error",
+          data: {
+            message: "未获取到图片数据",
+            responseStructure: {
+              hasCandidates: !!data?.candidates,
+              candidatesLength: data?.candidates?.length,
+              hasInlineData: !!data?.inlineData,
+              fullResponse: data,
+            },
+          },
+        });
+        throw new Error("未获取到图片数据，请检查调试面板查看详细响应结构");
       }
 
       // 转换为 base64 data URL
