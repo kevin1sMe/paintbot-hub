@@ -74,14 +74,43 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
-    "postcss": "^8.4.47",
+    "postcss": "^8.5.12",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^6.3.6"
+    "vite": "~6.4.2"
   },
   "overrides": {
     "js-yaml": "^4.1.1",
-    "glob": "^10.5.0"
+    "glob": "^10.5.0",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "9.0.7"
+    },
+    "ajv": "^6.15.0",
+    "anymatch": {
+      "picomatch": "2.3.2"
+    },
+    "brace-expansion@^1.1.7": "1.1.14",
+    "flat-cache": {
+      "flatted": "3.4.2"
+    },
+    "fdir": {
+      "picomatch": "4.0.4"
+    },
+    "lodash": "^4.18.1",
+    "minimatch@^3.1.2": "3.1.5",
+    "micromatch": {
+      "picomatch": "2.3.2"
+    },
+    "readdirp": {
+      "picomatch": "2.3.2"
+    },
+    "rollup": "^4.60.2",
+    "tinyglobby": {
+      "picomatch": "4.0.4"
+    },
+    "vite": {
+      "picomatch": "4.0.4"
+    }
   }
 }
