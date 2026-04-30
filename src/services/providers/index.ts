@@ -43,15 +43,13 @@ export function getProvider(providerType: string, options: ProviderOptions = {})
     case 'openai':
       provider = new OpenAIProvider(config);
       break;
-    case 'wanx2':
-      // 假设阿里云通义万相V2正在开发中，但仍然创建实例以供UI展示
+    case 'wanx':
       provider = new WanxProvider(config);
       break;
     case 'qianfan':
       provider = new QianfanProvider(config);
       break;
     case 'doubaoimg':
-      // 假设火山引擎豆包正在开发中，但仍然创建实例以供UI展示
       provider = new DoubaoImgProvider(config);
       break;
     case 'minimax':
@@ -61,7 +59,6 @@ export function getProvider(providerType: string, options: ProviderOptions = {})
       provider = new GeminiProvider(config);
       break;
     default:
-      // 对于未实现的提供者，返回通用实现
       provider = new NotImplementedProvider(config);
   }
 
@@ -75,19 +72,19 @@ export function getProvider(providerType: string, options: ProviderOptions = {})
  */
 export function getProviderByModel(modelId: string, options: ProviderOptions = {}): ModelProvider {
   // 根据模型ID前缀决定使用哪个提供者
-  if (modelId.startsWith('cogview-')) {
+  if (modelId.startsWith('cogview-') || modelId === 'glm-image') {
     return getProvider('cogview', options);
-  } else if (modelId.startsWith('gpt-image-1') || modelId.startsWith('dall-e-')) {
+  } else if (modelId.startsWith('gpt-image-') || modelId.startsWith('dall-e-')) {
     return getProvider('openai', options);
-  } else if (modelId.startsWith('wanx2')) {
-    return getProvider('wanx2', options);
-  } else if (modelId === 'irag-1.0' || modelId === 'flux.1-schnell') {
+  } else if (modelId.startsWith('wanx') || modelId.startsWith('wan') || modelId === 'qwen-image') {
+    return getProvider('wanx', options);
+  } else if (modelId === 'irag-1.0' || modelId === 'flux.1-schnell' || modelId === 'ernie-image') {
     return getProvider('qianfan', options);
-  } else if (modelId.startsWith('doubaoimg-')) {
+  } else if (modelId.startsWith('doubaoimg-') || modelId.startsWith('seedream-')) {
     return getProvider('doubaoimg', options);
   } else if (modelId === 'image-01') {
     return getProvider('minimax', options);
-  } else if (modelId.startsWith('gemini-')) {
+  } else if (modelId.startsWith('gemini-') || modelId.startsWith('nano-banana-')) {
     return getProvider('gemini', options);
   } else {
     throw new Error(`不支持的模型: ${modelId}`);
@@ -101,7 +98,7 @@ export function getAllProviders(options: ProviderOptions = {}): ModelProvider[] 
   return [
     getProvider('cogview', options),
     getProvider('openai', options),
-    getProvider('wanx2', options),
+    getProvider('wanx', options),
     getProvider('qianfan', options),
     getProvider('doubaoimg', options),
     getProvider('minimax', options),
