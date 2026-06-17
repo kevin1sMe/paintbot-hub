@@ -77,10 +77,10 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "~6.4.2"
+    "vite": "~6.4.3"
   },
   "overrides": {
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.2.0",
     "glob": "^10.5.0",
     "@typescript-eslint/typescript-estree": {
       "minimatch": "9.0.7"
@@ -91,6 +91,7 @@
       "picomatch": "2.3.2"
     },
     "brace-expansion@^1.1.7": "1.1.14",
+    "brace-expansion@5.0.2 - 5.0.5": "5.0.6",
     "flat-cache": {
       "flatted": "3.4.2"
     },
