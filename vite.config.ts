@@ -4,6 +4,14 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  build: {
+    target: "es2022",
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: "es2022",
+    },
+  },
   server: {
     host: "::",
     port: 8080,
