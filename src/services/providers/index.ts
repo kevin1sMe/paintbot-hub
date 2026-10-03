@@ -76,13 +76,13 @@ export function getProviderByModel(modelId: string, options: ProviderOptions = {
     return getProvider('cogview', options);
   } else if (modelId.startsWith('gpt-image-') || modelId.startsWith('dall-e-')) {
     return getProvider('openai', options);
-  } else if (modelId.startsWith('wanx') || modelId.startsWith('wan') || modelId === 'qwen-image') {
+  } else if (modelId.startsWith('wan') || modelId.startsWith('qwen-image') || modelId === 'z-image-turbo') {
     return getProvider('wanx', options);
-  } else if (modelId === 'irag-1.0' || modelId === 'flux.1-schnell' || modelId === 'ernie-image') {
+  } else if (modelId === 'irag-1.0' || modelId === 'flux.1-schnell' || modelId.startsWith('ernie-image')) {
     return getProvider('qianfan', options);
-  } else if (modelId.startsWith('doubaoimg-') || modelId.startsWith('seedream-')) {
+  } else if (modelId.startsWith('doubaoimg-') || modelId.startsWith('seedream-') || modelId.startsWith('doubao-seedream-')) {
     return getProvider('doubaoimg', options);
-  } else if (modelId === 'image-01') {
+  } else if (modelId === 'image-01' || modelId === 'image-01-live') {
     return getProvider('minimax', options);
   } else if (modelId.startsWith('gemini-') || modelId.startsWith('nano-banana-')) {
     return getProvider('gemini', options);
@@ -129,4 +129,4 @@ export async function generateImage(params: {
   
   // 调用提供者的生成方法
   return provider.generateImage(params);
-} 
+}

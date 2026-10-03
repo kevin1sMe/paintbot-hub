@@ -5,7 +5,11 @@ interface EnvConfig {
   ZHIPU_API_KEY?: string;
   BAIDU_API_KEY?: string;
   ALIYUN_WANX_KEY?: string;
+  ALIYUN_WANX_BASE_URL?: string;
   VOLCENGINE_KEY?: string;
+  ARK_API_KEY?: string;
+  GEMINI_API_KEY?: string;
+  MINIMAX_API_KEY?: string;
   PROXY_URL?: string;
 }
 
@@ -34,7 +38,11 @@ export const getAPIKeyFromEnv = (provider: string): string => {
     case 'aliyun_wanx_key':
       return config.ALIYUN_WANX_KEY || '';
     case 'volcengine_key':
-      return config.VOLCENGINE_KEY || '';
+      return config.VOLCENGINE_KEY || config.ARK_API_KEY || '';
+    case 'gemini_key':
+      return config.GEMINI_API_KEY || '';
+    case 'minimax_key':
+      return config.MINIMAX_API_KEY || '';
     default:
       return '';
   }
@@ -50,4 +58,4 @@ export const getOpenAIBaseUrl = (): string => {
 export const getProxyUrl = (): string => {
   const config = getEnvConfig();
   return config.PROXY_URL || '';
-}; 
+};

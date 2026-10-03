@@ -80,22 +80,9 @@ export abstract class BaseModelProvider implements ModelProvider {
     
     const supportedSizes = this.getSupportedSizes(model);
     
-    if (Math.abs(aspectRatio - 1) < 0.1) {
-      // 接近正方形的比例
-      const squareSize = supportedSizes.find(size => size.width === size.height);
-      if (squareSize) return squareSize;
-    } else if (aspectRatio > 1) {
-      // 横向比例
-      const landscapeSize = supportedSizes.find(size => size.width > size.height);
-      if (landscapeSize) return landscapeSize;
-    } else {
-      // 纵向比例
-      const portraitSize = supportedSizes.find(size => size.height > size.width);
-      if (portraitSize) return portraitSize;
-    }
-    
-    // 如果没有找到合适的尺寸，返回第一个支持的尺寸
-    return supportedSizes[0];
+    return supportedSizes.reduce((closest, size) =>
+      Math.abs(size.width / size.height - aspectRatio) < Math.abs(closest.width / closest.height - aspectRatio)
+        ? size : closest, supportedSizes[0]);
   }
 
   /**
@@ -128,7 +115,7 @@ export abstract class BaseModelProvider implements ModelProvider {
     if (!imgUrl) throw new Error("未获取到图片URL");
     
     // 如果返回的是base64数据，则转换为数据URL
-    if (data?.data?.[0]?.b64_json) {
+    if (candidates?.[0]?.b64_json) {
       return `data:image/png;base64,${imgUrl}`;
     }
     
@@ -148,4 +135,4 @@ export class NotImplementedProvider extends BaseModelProvider {
   async generateImage(params: GenerateImageParams): Promise<string> {
     throw new Error(this.errorMessage);
   }
-} 
+}

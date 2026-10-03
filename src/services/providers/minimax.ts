@@ -113,12 +113,13 @@ export class MinimaxProvider extends BaseModelProvider {
     // Minimax支持的尺寸
     return [
       { width: 1024, height: 1024 }, // 1:1
-      { width: 1024, height: 768 },  // 4:3
-      { width: 768, height: 1024 },  // 3:4
+      { width: 1152, height: 864 },  // 4:3
+      { width: 864, height: 1152 },  // 3:4
       { width: 1280, height: 720 },  // 16:9
       { width: 720, height: 1280 },  // 9:16
-      { width: 1152, height: 896 },  // 9:7
-      { width: 896, height: 1152 },  // 7:9
+      { width: 1248, height: 832 },  // 3:2
+      { width: 832, height: 1248 },  // 2:3
+      ...(model === 'image-01' ? [{ width: 1344, height: 576 }] : []),
     ];
   }
 
@@ -127,24 +128,11 @@ export class MinimaxProvider extends BaseModelProvider {
    */
   private getAspectRatio(width: number, height: number): string {
     const ratio = width / height;
-    
-    if (Math.abs(ratio - 1) < 0.1) {
-      return "1:1";
-    } else if (Math.abs(ratio - 4/3) < 0.1) {
-      return "4:3";
-    } else if (Math.abs(ratio - 3/4) < 0.1) {
-      return "3:4";
-    } else if (Math.abs(ratio - 16/9) < 0.1) {
-      return "16:9";
-    } else if (Math.abs(ratio - 9/16) < 0.1) {
-      return "9:16";
-    } else if (Math.abs(ratio - 9/7) < 0.1) {
-      return "9:7";
-    } else if (Math.abs(ratio - 7/9) < 0.1) {
-      return "7:9";
-    } else {
-      // 默认返回1:1
-      return "1:1";
-    }
+    const ratios: Record<string, number> = {
+      '1:1': 1, '4:3': 4 / 3, '3:4': 3 / 4, '16:9': 16 / 9,
+      '9:16': 9 / 16, '3:2': 3 / 2, '2:3': 2 / 3, '21:9': 21 / 9,
+    };
+    return Object.keys(ratios).reduce((closest, key) =>
+      Math.abs(ratio - ratios[key]) < Math.abs(ratio - ratios[closest]) ? key : closest, '1:1');
   }
-} 
+}

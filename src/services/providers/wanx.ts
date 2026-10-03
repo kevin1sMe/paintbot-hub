@@ -5,6 +5,7 @@
 import { BaseModelProvider } from './base';
 import { GenerateImageParams, ImageSize, ModelProviderConfig } from '../types';
 import { getTimestamp, maskAPIKey } from '../utils';
+import { getEnvConfig } from '@/config/env';
 
 export class WanxProvider extends BaseModelProvider {
   constructor(config: ModelProviderConfig) {
@@ -19,24 +20,39 @@ export class WanxProvider extends BaseModelProvider {
     const apiKey = this.getApiKey();
     
     // API端点
-    const url = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis";
+    const baseUrl = (getEnvConfig().ALIYUN_WANX_BASE_URL || 'https://dashscope.aliyuncs.com/api/v1').replace(/\/+$/, '');
+    const synchronous = model.startsWith('qwen-image') || model === 'z-image-turbo' || model.startsWith('wan2.7-image') || model === 'wan2.6-t2i';
+    const interleave = model === 'wan2.6-image';
+    const url = `${baseUrl}/services/aigc/${synchronous ? 'multimodal-generation/generation' : interleave ? 'image-generation/generation' : 'text2image/image-synthesis'}`;
 
     // 请求体
-    const requestBody: Record<string, unknown> = {
+    const input: { prompt?: string; negative_prompt?: string; messages?: unknown[] } = synchronous || interleave
+      ? { messages: [{ role: 'user', content: [{ text: prompt }] }] }
+      : { prompt };
+    const parameters: Record<string, unknown> = { size: imageSize.replace('x', '*') };
+    if (model !== 'z-image-turbo') parameters.n = 1;
+    if (interleave) {
+      parameters.enable_interleave = true;
+      parameters.max_images = 1;
+    }
+    const requestBody = {
       model: model,
-      input: {
-        prompt: prompt,
-      },
-      parameters: {
-        size: imageSize,
-        n: 1
-      }
+      input,
+      parameters,
     };
 
     // 如果提供了负面提示词，则添加到请求体中
-    if (negativePrompt) {
-      requestBody.input.negative_prompt = negativePrompt;
+    if (negativePrompt && (model.startsWith('qwen-image') || model === 'wan2.6-t2i')) {
+      parameters.negative_prompt = negativePrompt;
+    } else if (negativePrompt && !synchronous && !interleave) {
+      input.negative_prompt = negativePrompt;
     }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    };
+    if (!synchronous) headers['X-DashScope-Async'] = 'enable';
 
     // 记录请求
     addLog({
@@ -46,8 +62,7 @@ export class WanxProvider extends BaseModelProvider {
         url,
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-DashScope-Async": "enable",
+          ...headers,
           "Authorization": `Bearer ${maskAPIKey(apiKey)}`,
         },
         body: requestBody,
@@ -58,11 +73,7 @@ export class WanxProvider extends BaseModelProvider {
       // 第一步：创建任务
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-DashScope-Async": "enable",
-          "Authorization": `Bearer ${apiKey}`,
-        },
+        headers,
         body: JSON.stringify(requestBody),
       });
 
@@ -92,6 +103,12 @@ export class WanxProvider extends BaseModelProvider {
         data: taskData,
       });
       
+      if (synchronous) {
+        const imgUrl = taskData.output?.choices?.[0]?.message?.content?.find((part: { image?: string }) => part.image)?.image;
+        if (!imgUrl) throw new Error(taskData.message || '未获取到图片URL');
+        return imgUrl;
+      }
+
       if (!taskData.output?.task_id) {
         throw new Error("未获取到任务ID");
       }
@@ -102,11 +119,11 @@ export class WanxProvider extends BaseModelProvider {
       // 轮询任务状态
       let taskResult;
       let retry = 0;
-      const maxRetry = 30; // 最多轮询30次
-      const taskUrl = `${url}/tasks/${taskId}`;
+      const maxRetry = 120;
+      const taskUrl = `${baseUrl}/tasks/${taskId}`;
       
       while (retry < maxRetry) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 等待1秒
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         // 查询任务状态
         const taskResponse = await fetch(taskUrl, {
@@ -149,7 +166,7 @@ export class WanxProvider extends BaseModelProvider {
         }
         
         // 如果任务失败
-        if (taskResult.output?.task_status === "FAILED") {
+        if (["FAILED", "CANCELED", "UNKNOWN"].includes(taskResult.output?.task_status)) {
           throw new Error(`任务处理失败: ${JSON.stringify(taskResult.output)}`);
         }
         
@@ -161,7 +178,7 @@ export class WanxProvider extends BaseModelProvider {
       }
       
       // 获取图片URL
-      const imgUrl = taskResult.output?.results?.[0]?.url;
+      const imgUrl = taskResult.output?.results?.[0]?.url || taskResult.output?.choices?.[0]?.message?.content?.find((part: { image?: string }) => part.image)?.image;
       if (!imgUrl) throw new Error("未获取到图片URL");
       
       return imgUrl;
@@ -174,6 +191,40 @@ export class WanxProvider extends BaseModelProvider {
    * 获取支持的尺寸
    */
   getSupportedSizes(model: string): ImageSize[] {
+    if (model.startsWith('qwen-image') && !/^qwen-image-(2\.|3\.)/.test(model)) {
+      return [
+        { width: 1328, height: 1328 },
+        { width: 1664, height: 928 },
+        { width: 928, height: 1664 },
+        { width: 1472, height: 1104 },
+        { width: 1104, height: 1472 },
+      ];
+    }
+    if (model === 'wan2.6-t2i') {
+      return [
+        { width: 1280, height: 1280 },
+        { width: 1696, height: 960 },
+        { width: 960, height: 1696 },
+        { width: 1472, height: 1104 },
+        { width: 1104, height: 1472 },
+      ];
+    }
+    if (model.startsWith('wan2.7-image') || /^qwen-image-(2\.|3\.)/.test(model)) {
+      return [
+        { width: 1024, height: 1024 },
+        { width: 1536, height: 1024 },
+        { width: 1024, height: 1536 },
+        { width: 2048, height: 2048 },
+        ...(model === 'wan2.7-image-pro' ? [{ width: 4096, height: 4096 }] : []),
+      ];
+    }
+    if (model === 'wan2.6-image' || model === 'z-image-turbo') {
+      return [
+        { width: 1024, height: 1024 },
+        { width: 1280, height: 720 },
+        { width: 720, height: 1280 },
+      ];
+    }
     // 通义万相V2支持的尺寸
     return [
       { width: 512, height: 512 },
@@ -183,4 +234,4 @@ export class WanxProvider extends BaseModelProvider {
       { width: 1280, height: 720 }
     ];
   }
-} 
+}

@@ -8,6 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+    "test": "node scripts/run-check.mjs tests/providers.test.mjs",
+    "test:live": "node scripts/run-check.mjs scripts/smoke-models.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -5,6 +5,7 @@
 import { BaseModelProvider } from './base';
 import { GenerateImageParams, ImageSize, ModelProviderConfig } from '../types';
 import { getTimestamp, maskAPIKey, parseImageSize } from '../utils';
+import { getOpenAIBaseUrl } from '@/config/env';
 
 export class OpenAIProvider extends BaseModelProvider {
   constructor(config: ModelProviderConfig) {
@@ -24,7 +25,8 @@ export class OpenAIProvider extends BaseModelProvider {
     }
     
     // API端点
-    const url = "https://api.openai.com/v1/images/generations";
+    const baseUrl = getOpenAIBaseUrl().replace(/\/+$/, '').replace(/\/v1$/, '');
+    const url = `${baseUrl}/v1/images/generations`;
 
     // 解析宽高
     const { width, height } = parseImageSize(imageSize);
@@ -43,9 +45,9 @@ export class OpenAIProvider extends BaseModelProvider {
       size: "1024x1024"
     };
     
-    if (model.startsWith("gpt-image-1")) {
+    if (model.startsWith("gpt-image-")) {
       // 使用GPT-Image-1模型
-      apiModel = "gpt-image-1";
+      apiModel = model.replace(/^gpt-image-1-(high|medium|low)$/, 'gpt-image-1');
       
       // GPT-Image-1只支持 1024x1024, 1536x1024, 1024x1536 或 auto 这四种尺寸
       // 根据用户选择的尺寸和比例，选择合适的GPT-Image-1支持的尺寸
@@ -197,7 +199,7 @@ export class OpenAIProvider extends BaseModelProvider {
       return [{ width: 1024, height: 1024 }];
     }
     
-    if (model.startsWith("gpt-image-1")) {
+    if (model.startsWith("gpt-image-")) {
       // GPT-Image-1支持的尺寸
       return [
         { width: 1024, height: 1024 }, // 正方形
@@ -225,4 +227,4 @@ export class OpenAIProvider extends BaseModelProvider {
       ];
     }
   }
-} 
+}

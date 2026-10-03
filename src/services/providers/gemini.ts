@@ -24,7 +24,12 @@ export class GeminiProvider extends BaseModelProvider {
     }
 
     // API端点
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const aliases: Record<string, string> = {
+      'nano-banana-2': 'gemini-3.1-flash-image',
+      'nano-banana-pro': 'gemini-3-pro-image',
+    };
+    const apiModel = aliases[model] || model;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent`;
 
     // 解析图片尺寸，转换为 aspect_ratio 格式
     const { width, height } = parseImageSize(imageSize);
@@ -36,27 +41,23 @@ export class GeminiProvider extends BaseModelProvider {
         parts: [{
           text: prompt
         }]
-      }]
+      }],
+      generationConfig: {
+        responseModalities: ['TEXT', 'IMAGE'],
+        imageConfig: { aspectRatio },
+      },
     };
-
-    // 如果有自定义宽高比，添加到 generationConfig 中
-    if (aspectRatio && aspectRatio !== '1:1') {
-      requestBody.generationConfig = {
-        imageConfig: {
-          aspectRatio: aspectRatio
-        }
-      };
-    }
 
     // 记录请求（隐藏API key）
     addLog({
       timestamp: getTimestamp(),
       type: "request",
       data: {
-        url: url.replace(apiKey, maskAPIKey(apiKey)),
+        url,
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-goog-api-key": maskAPIKey(apiKey),
         },
         body: requestBody,
       },
@@ -67,6 +68,7 @@ export class GeminiProvider extends BaseModelProvider {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
         },
         body: JSON.stringify(requestBody),
       });

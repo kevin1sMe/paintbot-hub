@@ -100,6 +100,17 @@ export class CogviewProvider extends BaseModelProvider {
    * 获取支持的尺寸
    */
   getSupportedSizes(model: string): ImageSize[] {
+    if (model === 'glm-image') {
+      return [
+        { width: 1280, height: 1280 },
+        { width: 1568, height: 1056 },
+        { width: 1056, height: 1568 },
+        { width: 1472, height: 1088 },
+        { width: 1088, height: 1472 },
+        { width: 1728, height: 960 },
+        { width: 960, height: 1728 },
+      ];
+    }
     // 安全检查：确保model是有效字符串
     if (!model || typeof model !== 'string') {
       // 返回默认尺寸
@@ -111,4 +122,4 @@ export class CogviewProvider extends BaseModelProvider {
       { width: 1024, height: 1024 }
     ];
   }
-} 
+}

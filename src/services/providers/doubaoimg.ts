@@ -4,6 +4,7 @@
 
 import { BaseModelProvider } from './base';
 import { GenerateImageParams, ImageSize, ModelProviderConfig } from '../types';
+import { getEnvConfig } from '@/config/env';
 import { 
   getTimestamp, 
   maskAPIKey, 
@@ -22,7 +23,42 @@ export class DoubaoImgProvider extends BaseModelProvider {
    */
   async generateImage(params: GenerateImageParams): Promise<string> {
     const { prompt, model, imageSize, addLog, negativePrompt } = params;
-    const apiKey = this.getApiKey();
+    const isSeedream = model.startsWith('doubao-seedream-') || model.startsWith('seedream-');
+    const apiKey = (isSeedream && getEnvConfig().ARK_API_KEY) || this.getApiKey();
+
+    if (isSeedream) {
+      const aliases: Record<string, string> = {
+        'seedream-5.0': 'doubao-seedream-5-0-pro-260628',
+        'seedream-5.0-lite': 'doubao-seedream-5-0-lite-260128',
+        'seedream-4.5': 'doubao-seedream-4-5-251128',
+        'seedream-4.0': 'doubao-seedream-4-0-250828',
+      };
+      const url = 'https://ark.cn-beijing.volces.com/api/v3/images/generations';
+      const body = {
+        model: aliases[model] || model,
+        prompt,
+        size: imageSize,
+        response_format: 'url',
+        stream: false,
+        watermark: false,
+      };
+      addLog({ timestamp: getTimestamp(), type: 'request', data: {
+        url, method: 'POST', headers: { Authorization: `Bearer ${maskAPIKey(apiKey)}` }, body,
+      } });
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify(body),
+        });
+        if (!response.ok) throw new Error(`API调用失败: ${response.status} - ${await response.text()}`);
+        const data = await response.json();
+        addLog({ timestamp: getTimestamp(), type: 'response', data });
+        return this.extractImageUrl(data);
+      } catch (error) {
+        return this.handleApiError(error, addLog);
+      }
+    }
     
     // 解析API密钥（格式：accessKeyId:secretAccessKey）
     const [accessKeyId, secretAccessKey] = apiKey.split(':');
@@ -312,6 +348,15 @@ export class DoubaoImgProvider extends BaseModelProvider {
    * 获取支持的尺寸
    */
   getSupportedSizes(model: string): ImageSize[] {
+    if (model.startsWith('doubao-seedream-') || model.startsWith('seedream-')) {
+      return [
+        { width: 2048, height: 2048 },
+        { width: 2560, height: 1440 },
+        { width: 1440, height: 2560 },
+        { width: 2304, height: 1728 },
+        { width: 1728, height: 2304 },
+      ];
+    }
     // 豆包文生图支持的尺寸
     return [
       { width: 512, height: 512 },
@@ -476,4 +521,4 @@ export class DoubaoImgProvider extends BaseModelProvider {
     localStorage.removeItem('doubaoimg_selected_proxy');
     console.info('已清除所有代理设置，恢复默认');
   }
-} 
+}

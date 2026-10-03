@@ -370,8 +370,22 @@ const Index = () => {
   const userPrefs = loadUserPreferences();
 
   // 基本状态 - 从用户偏好中恢复
-  const [model, setModel] = useState(userPrefs.model || DEFAULT_MODEL);
-  const [subModel, setSubModel] = useState(userPrefs.subModel || DEFAULT_SUB_MODEL);
+  const [model, setModel] = useState(() => MODELS.find(provider => provider.value === userPrefs.model)?.value || DEFAULT_MODEL);
+  const [subModel, setSubModel] = useState(() => {
+    const provider = MODELS.find(provider => provider.value === model);
+    const savedModel = userPrefs.subModel || DEFAULT_SUB_MODEL;
+    const aliases: Record<string, string> = {
+      'nano-banana-2': 'gemini-3.1-flash-image',
+      'nano-banana-pro': 'gemini-3-pro-image',
+      'gemini-3-pro-image-preview': 'gemini-3-pro-image',
+      'seedream-5.0': 'doubao-seedream-5-0-pro-260628',
+      'seedream-5.0-lite': 'doubao-seedream-5-0-lite-260128',
+      'seedream-4.5': 'doubao-seedream-4-5-251128',
+      'seedream-4.0': 'doubao-seedream-4-0-250828',
+      'ernie-image': 'ernie-image-turbo',
+    };
+    return provider?.children?.find(child => child.value === (aliases[savedModel] || savedModel))?.value || provider?.children?.[0]?.value || '';
+  });
 
   // 尺寸相关状态 - 从用户偏好中恢复
   const [selectedRatio, setSelectedRatio] = useState(userPrefs.selectedRatio || "4:3");
@@ -382,6 +396,7 @@ const Index = () => {
     const aspectRatio = ASPECT_RATIOS.find(r => r.value === "4:3")?.ratio || 4/3;
     return calculateDimensions(aspectRatio);
   });
+  const dimensionMax = Math.max(...getModelSupportedSizes(subModel || model).flatMap(size => [size.width, size.height]));
 
   // 生成相关状态 - 从用户偏好中恢复
   const [prompt, setPrompt] = useState(userPrefs.prompt || "");
@@ -468,64 +483,29 @@ const Index = () => {
   // 检查尺寸是否有效
   const validateDimensions = () => {
     const { width, height } = dimensions;
-    
-    // 首先获取当前选择的子模型
     const currentModelValue = subModel || model;
-    
-    // 检查当前尺寸是否被模型支持
-    if (currentModelValue.startsWith("gpt-image-1") || 
-        currentModelValue.startsWith("dall-e-3") || 
-        currentModelValue === "dall-e-2") {
-      // 对于OpenAI模型，需要检查尺寸是否在支持列表中
-      return isImageSizeSupported(currentModelValue, width, height);
-    } else {
-      // 对于其他模型，使用通用验证规则
-      
-      // 检查范围
-      if (width < 512 || width > 2048 || height < 512 || height > 2048) {
-        return false;
-      }
-      
-      // 检查能否被16整除
-      if (width % 16 !== 0 || height % 16 !== 0) {
-        return false;
-      }
-      
-      // 检查总像素数
-      if (width * height > Math.pow(2, 21)) {
-        return false;
-      }
-    }
-    
-    return true;
+    return isImageSizeSupported(currentModelValue, width, height);
   };
 
   // 根据模型和比例调整尺寸
   const adjustDimensionsToModel = useCallback(() => {
     const currentModelValue = subModel || model;
     
-    // 如果是OpenAI模型，检查并调整尺寸
-    if (currentModelValue.startsWith("gpt-image-1") || 
-        currentModelValue.startsWith("dall-e-3") || 
-        currentModelValue === "dall-e-2") {
-      
-      // 如果当前尺寸不被支持，自动调整为推荐尺寸
-      if (!isImageSizeSupported(currentModelValue, dimensions.width, dimensions.height)) {
-        // 根据当前宽高比获取推荐尺寸
-        const aspectRatio = dimensions.width / dimensions.height;
-        const recommendedSize = getRecommendedSize(currentModelValue, aspectRatio);
-        
-        setDimensions({
-          width: recommendedSize.width,
-          height: recommendedSize.height
-        });
-        
-        // 显示调整提示
-        toast({ 
-          title: "图片尺寸已调整", 
-          description: `已自动调整为${currentModelValue}支持的尺寸: ${recommendedSize.width}x${recommendedSize.height}` 
-        });
-      }
+    // 如果当前尺寸不被支持，自动调整为推荐尺寸
+    if (!isImageSizeSupported(currentModelValue, dimensions.width, dimensions.height)) {
+      // 根据当前宽高比获取推荐尺寸
+      const aspectRatio = dimensions.width / dimensions.height;
+      const recommendedSize = getRecommendedSize(currentModelValue, aspectRatio);
+
+      setDimensions({
+        width: recommendedSize.width,
+        height: recommendedSize.height
+      });
+
+      toast({
+        title: "图片尺寸已调整",
+        description: `已自动调整为${currentModelValue}支持的尺寸: ${recommendedSize.width}x${recommendedSize.height}`
+      });
     }
   }, [dimensions.height, dimensions.width, model, subModel]);
 
@@ -581,8 +561,8 @@ const Index = () => {
     }
     
     // 确保在有效范围内
-    newWidth = Math.min(Math.max(newWidth, 512), 2048);
-    newHeight = Math.min(Math.max(newHeight, 512), 2048);
+    newWidth = Math.min(Math.max(newWidth, 512), dimensionMax);
+    newHeight = Math.min(Math.max(newHeight, 512), dimensionMax);
     
     setDimensions({ width: newWidth, height: newHeight });
   };
@@ -1307,7 +1287,7 @@ const Index = () => {
                     <input 
                       type="range"
                       min="512"
-                      max="2048"
+                      max={dimensionMax}
                       step="16"
                       value={dimensions.width}
                       onChange={(e) => handleDimensionChange('width', e.target.value)}
@@ -1318,7 +1298,7 @@ const Index = () => {
                     <input 
                       type="range"
                       min="512"
-                      max="2048"
+                      max={dimensionMax}
                       step="16"
                       value={dimensions.height}
                       onChange={(e) => handleDimensionChange('height', e.target.value)}
@@ -1330,20 +1310,12 @@ const Index = () => {
                 {/* 错误提示 */}
                 {!validateDimensions() && (
                   <p className="text-xs text-red-500 mb-1">
-                    {(subModel || model).startsWith("gpt-image-1") ? 
-                      "GPT-Image-1 仅支持 1024x1024、1536x1024、1024x1536" : 
-                      (subModel || model).startsWith("dall-e-3") ? 
-                      "DALL-E 3 仅支持 1024x1024、1792x1024、1024x1792" : 
-                      (subModel || model) === "dall-e-2" ? 
-                      "DALL-E 2 仅支持 256x256、512x512、1024x1024" : 
-                      "尺寸需在512-2048间且被16整除"}
+                    请选择当前模型支持的预设尺寸
                   </p>
                 )}
                 
                 {/* 支持的预设尺寸 */}
-                {((subModel || model).startsWith("gpt-image-1") || 
-                  (subModel || model).startsWith("dall-e-3") || 
-                  (subModel || model) === "dall-e-2") && (
+                {(
                   <div className="flex flex-wrap gap-1 mb-1">
                     {getModelSupportedSizes(subModel || model).map((size, index) => (
                       <button 
@@ -1820,5 +1792,3 @@ const Index = () => {
 };
 
 export default Index;
-
-

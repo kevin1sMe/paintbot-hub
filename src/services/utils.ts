@@ -48,7 +48,7 @@ export async function computeSha256(message: string): Promise<string> {
 }
 
 // HMAC计算
-export async function computeHmac(key: ArrayBuffer, message: string): Promise<ArrayBuffer> {
+export async function computeHmac(key: BufferSource, message: string): Promise<ArrayBuffer> {
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     key,
@@ -117,4 +117,4 @@ export function loadUserPreferences(): UserPreferences {
     console.error('加载用户偏好设置失败:', error);
     return {};
   }
-} 
+}
